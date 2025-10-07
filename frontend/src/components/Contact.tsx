@@ -9,13 +9,15 @@ const Contact = () => {
     subject: '',
     message: ''
   });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
     console.log('Form submitted:', formData);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -44,8 +46,12 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="py-20 bg-gradient-to-br from-gray-900 to-gray-800">
+    <section
+      id="contact"
+      className="py-20 bg-gradient-to-br from-white via-orange-50 to-white"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Heading */}
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
@@ -53,10 +59,10 @@ const Contact = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Get In Touch
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Have questions about our flavored powders? We'd love to hear from you!
           </p>
         </motion.div>
@@ -69,16 +75,16 @@ const Contact = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl border border-white/20">
-              <h3 className="font-playfair text-2xl font-semibold text-white mb-6 flex items-center">
-                <MessageCircle className="w-6 h-6 mr-3 text-orange-400" />
+            <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-100">
+              <h3 className="font-playfair text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                <MessageCircle className="w-6 h-6 mr-3 text-orange-500" />
                 Send us a Message
               </h3>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Your Name
                     </label>
                     <input
@@ -86,13 +92,13 @@ const Contact = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                       placeholder="Enter your name"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email Address
                     </label>
                     <input
@@ -100,7 +106,7 @@ const Contact = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                       placeholder="Enter your email"
                       required
                     />
@@ -108,26 +114,25 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Subject
                   </label>
                   <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                     required
                   >
-                    <option value="" className="text-gray-800">Select a subject</option>
-                    <option value="product-inquiry" className="text-gray-800">Product Inquiry</option>
-                    <option value="bulk-order" className="text-gray-800">Bulk Order</option>
-                    {/* <option value="partnership" className="text-gray-800">Partnership</option> */}
-                    <option value="support" className="text-gray-800">Customer Support</option>
+                    <option value="">Select a subject</option>
+                    <option value="product-inquiry">Product Inquiry</option>
+                    <option value="bulk-order">Bulk Order</option>
+                    <option value="support">Customer Support</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Message
                   </label>
                   <textarea
@@ -135,7 +140,7 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     rows={5}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
                     placeholder="Tell us how we can help you..."
                     required
                   />
@@ -143,7 +148,7 @@ const Contact = () => {
 
                 <motion.button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -162,11 +167,10 @@ const Contact = () => {
             transition={{ duration: 0.8 }}
             className="space-y-8"
           >
-            {/* Contact Cards */}
             {contactInfo.map((info, index) => (
               <motion.div
                 key={index}
-                className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                className="bg-white p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300"
                 whileHover={{ scale: 1.02, y: -5 }}
               >
                 <div className="flex items-start space-x-4">
@@ -174,13 +178,13 @@ const Contact = () => {
                     <info.icon className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-white text-lg mb-1">
+                    <h4 className="font-semibold text-gray-900 text-lg mb-1">
                       {info.title}
                     </h4>
-                    <p className="text-orange-300 font-medium mb-1">
+                    <p className="text-orange-600 font-medium mb-1">
                       {info.details}
                     </p>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-gray-600 text-sm">
                       {info.subtext}
                     </p>
                   </div>
@@ -190,7 +194,7 @@ const Contact = () => {
 
             {/* Business Hours */}
             <motion.div
-              className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20"
+              className="bg-white p-6 rounded-2xl shadow-md border border-gray-100"
               whileHover={{ scale: 1.02, y: -5 }}
             >
               <div className="flex items-start space-x-4">
@@ -198,37 +202,37 @@ const Contact = () => {
                   <Clock className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white text-lg mb-3">
+                  <h4 className="font-semibold text-gray-900 text-lg mb-3">
                     Business Hours
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Monday - Friday</span>
-                      <span className="text-orange-300">9:00 AM - 6:00 PM</span>
+                      <span className="text-gray-600">Monday - Friday</span>
+                      <span className="text-orange-600">9:00 AM - 6:00 PM</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Saturday</span>
-                      <span className="text-orange-300">10:00 AM - 4:00 PM</span>
+                      <span className="text-gray-600">Saturday</span>
+                      <span className="text-orange-600">10:00 AM - 4:00 PM</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Sunday</span>
-                      <span className="text-red-300">Closed</span>
+                      <span className="text-gray-600">Sunday</span>
+                      <span className="text-red-500">Closed</span>
                     </div>
                   </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* Quick Response Promise */}
+            {/* Quick Response */}
             <motion.div
-              className="bg-gradient-to-r from-orange-500 to-red-600 p-6 rounded-2xl text-white"
+              className="bg-gradient-to-r from-orange-500 to-red-600 p-6 rounded-2xl text-white shadow-md"
               whileHover={{ scale: 1.02 }}
             >
               <h4 className="font-semibold text-lg mb-2">
                 Quick Response Guarantee
               </h4>
               <p className="text-orange-100">
-                We respond to all inquiries within 24 hours. For urgent matters, 
+                We respond to all inquiries within 24 hours. For urgent matters,
                 call us directly during business hours.
               </p>
             </motion.div>

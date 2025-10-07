@@ -1,44 +1,42 @@
-// import React from 'react';
 import { motion } from 'framer-motion';
 import { Leaf, Instagram, Twitter, Youtube, Mail, Phone, MapPin, Linkedin } from 'lucide-react';
+
 const Footer = () => {
   const footerLinks = {
     products: [
-      'Ginger Powder',
-      'Garlic Powder',
-      'Onion Powder',
-      'Red Chilly Powder',
-      'Lemon Powder',
-      'Neem Powder',
-      'Black pepper Powder',
-      'White pepper Powder',
-      'Tomato Powder',
-      'Green Chilly Powder',
-      '& many more...'
-    ], 
-    company: [ 
-      'About Us',
-      'Our Story',
-      'Certifications',
-      'Sustainability',
-      'Careers',
-      'Terms & Conditions'
+      { name: 'All Products', href: '#products' },
+      { name: 'Spice Powders', href: '#products' },
+      { name: 'Herbal Powders', href: '#products' },
+      { name: 'Gift Sets', href: '#' },
+      { name: 'Seasonal Specials', href: '#' },
+      { name: 'Wellness Blends', href: '#' },
+      { name: '& many more...', href: '#products' },
+    ],
+    company: [
+      { name: 'About Us', href: '#about' },
+      { name: 'Our Story', href: '#about' },
+      { name: 'Careers', href: '#' },
+      { name: 'Press', href: '#' },
     ],
     support: [
-      'Contact Us',
-      'FAQ',
-      'Shipping Info',
-      'Returns',
-      'Track Order',
-      'Bulk Orders'
-    ]
+      { name: 'Contact Us', href: '#contact' },
+      { name: 'FAQ', href: '#' },
+      { name: 'Shipping Info', href: '#' },
+      { name: 'Returns', href: '#' },
+    ],
+    legal: [
+      { name: 'Privacy Policy', href: '#' },
+      { name: 'Terms of Service', href: '#' },
+      { name: 'Cookie Policy', href: '#' },
+      { name: 'Disclaimer', href: '#' },
+    ],
   };
 
   const socialLinks = [
     { icon: Linkedin, href: '#', label: 'Linkedin' },
     { icon: Instagram, href: '#', label: 'Instagram' },
     { icon: Twitter, href: '#', label: 'Twitter' },
-    { icon: Youtube, href: '#', label: 'YouTube' }
+    { icon: Youtube, href: '#', label: 'YouTube' },
   ];
 
   return (
@@ -59,7 +57,6 @@ const Footer = () => {
             <p className="text-gray-400 mb-8">
               Get exclusive recipes, cooking tips, and special offers delivered to your inbox
             </p>
-            
             <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <input
                 type="email"
@@ -81,9 +78,9 @@ const Footer = () => {
 
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Brand Section */}
-          <div className="lg:col-span-2">
+          <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -96,11 +93,9 @@ const Footer = () => {
                 </div>
                 <span className="font-playfair font-bold text-2xl">Nutrieve</span>
               </div>
-              
               <p className="text-gray-400 leading-relaxed mb-6 max-w-md">
                 Bringing you the finest Indian natural powders with genuine flavors and traditional recipes passed down through generations.
               </p>
-
               {/* Contact Info */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 text-gray-400">
@@ -119,83 +114,88 @@ const Footer = () => {
             </motion.div>
           </div>
 
-          {/* Products Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1, duration: 0.6 }}
-          >
-            <h4 className="font-semibold text-lg mb-6">Products</h4>
-            <ul className="space-y-3">
-              {footerLinks.products.map((link) => (
-                <li key={link}>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
-                  >
-                    {link}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          {/* Links Section (Products, Company, Support, Legal in one row) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+            {/* Products */}
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <h4 className="font-semibold text-lg mb-6">Products</h4>
+              <ul className="space-y-3">
+                {footerLinks.products.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
 
-          {/* Company Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-          >
-            <h4 className="font-semibold text-lg mb-6">Company</h4>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link}>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
-                  >
-                    {link}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            {/* Company */}
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <h4 className="font-semibold text-lg mb-6">Company</h4>
+              <ul className="space-y-3">
+                {footerLinks.company.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
 
-          {/* Support Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <h4 className="font-semibold text-lg mb-6">Support</h4>
-            <ul className="space-y-3">
-              {footerLinks.support.map((link) => (
-                <li key={link}>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
-                  >
-                    {link}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            {/* Support */}
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <h4 className="font-semibold text-lg mb-6">Support</h4>
+              <ul className="space-y-3">
+                {footerLinks.support.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Legal */}
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <h4 className="font-semibold text-lg mb-6">Legal</h4>
+              <ul className="space-y-3">
+                {footerLinks.legal.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
         </div>
 
-        {/* Social Media & Certifications */}
+        {/* Social + Certifications */}
         <motion.div
           className="border-t border-gray-800 mt-12 pt-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4, duration: 0.6 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
         >
           <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
-            {/* Social Links */}
+            {/* Social */}
             <div className="flex items-center space-x-6">
               <span className="text-gray-400 font-medium">Follow Us:</span>
               {socialLinks.map((social) => (
@@ -235,7 +235,7 @@ const Footer = () => {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.5, duration: 0.6 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
         >
           <p className="text-gray-400">
             © 2025 Nutrieve. All rights reserved. Made with ❤️ for authentic Indian flavors.

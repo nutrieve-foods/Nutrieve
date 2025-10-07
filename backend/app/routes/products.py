@@ -5,46 +5,39 @@ router = APIRouter(prefix="/api/products", tags=["products"])
 
 _PRODUCTS = [
     {"id": i + 1, "name": name, "price": price, "image": None, "description": desc}
-    for i, (name, price, desc) in enumerate(
-        ("Tomato Powder", 185, "Tangy zest for sauces and soups"),
-        ("Onion Powder", 230, "Rich, savory depth in every sprinkle"),
-        ("Garlic Powder", 375, "Bold aroma for instant flavor"),
-        ("Ginger Powder", 300, "Warm spice for teas and curries"),
-        ("Turmeric Powder", 185, "Golden health and flavor"),
-        ("Red Chili Powder", 375, "Fiery and vibrant"),
-        ("Coriander Powder", 250, "Fresh herbal notes"),
+    for i, (name, price, desc) in enumerate([
+        ("Tomato Powder", 185, "Tangy, sweet instant zest"),
+        ("Onion Powder", 230, "Intense savory depth"),
+        ("Garlic Powder", 375, "Bold aromatic base"),
+        ("Ginger Powder", 300, "Pungent warm spice"),
+        ("Turmeric Powder", 185, "Earthy golden flavor"),
+        ("Red Chili Powder", 375, "Fiery vibrant heat"),
+        ("Coriander Powder", 250, "Warm citrus herbal"),
         ("Black Pepper Powder", 1200, "Sharp pungent finish"),
-        ("Amla (Indian gooseberry) Powder", 500, "Vitamin C rich tartness"),
-        ("Ashwagandha Powder", 1400, "Ayurvedic vitality herb"),
-        ("Shatavari Powder", 1550, "Earthy sweetness and color"),
-        ("Safed Musli Powder", 2350, "Greens in a spoonful"),
-        ("Brahmi Powder", 1050, "Natural sweetness for blends"),
-        ("Tulsi(Holy Basil) Powder", 325, "Velvety body for soups"),
-        ("Moringa Powder", 500, "Tart zing for chaats"),
-        ("Neem Powder", 235, "Fresh herbal notes"),
-        ("Mint Powder", 245, "Refreshing cool aroma"),
-        ("Beetroot Powder", 315, "Toasty spice warmth"),
-        ("Carrot Powder", 250, "Distinct bitter-sweet profile"),
-        ("Spinach Powder", 270, "Rich nutty warmth"),
-        ("Karela/Bitter Gourd Powder", 270, "Punchy pungency"),
-        ("Apple Powder", 500, "Intense warm spice"),
-        ("Banana Powder", 325, "Sweet woody spice"),
-        ("Coconut Powder", 500, "Savory aromatic base"),
-        ("Green Chili Powder", 400, "Clean heat for blends"),
-        ("White Pepper Powder", 400, "Quintessential South Indian aroma"),
-        ("Onion Granules", 400, "Tangy depth for gravies"),
-        ("Green Peas Powder", 160, "Natural caramel sweetness"),
-        ("Lemon Powder", 180, "Citrusy brightness in a dash"),
+        ("Amla (Indian gooseberry) Powder", 500, "Intensely tart Vitamin-C"),
+        ("Ashwagandha Powder", 1400, "Earthy vitality herb"),
+        ("Shatavari Powder", 1550, "Mildly sweet cooling root"),
+        ("Safed Musli Powder", 2350, "Subtly sweet wellness"),
+        ("Brahmi Powder", 1050, "Bitter focus herb"),
+        ("Tulsi(Holy Basil) Powder", 325, "Pungent sweet aromatic"),
+        ("Moringa Powder", 500, "Grassy nutrient-dense"),
+        ("Neem Powder", 235, "Intensely bitter purification"),
+        ("Mint Powder", 245, "Cool refreshing aroma"),
+        ("Beetroot Powder", 315, "Sweet earthy color"),
+        ("Carrot Powder", 250, "Mild sweet vegetable"),
+        ("Spinach Powder", 270, "Earthy concentrated greens"),
+        ("Karela/Bitter Gourd Powder", 270, "Powerful bitter vegetable"),
+        ("Apple Powder", 500, "Naturally sweet fruit"),
+        ("Banana Powder", 325, "Sweet creamy smooth"),
+        ("Coconut Powder", 500, "Rich sweet tropical"),
+        ("Green Chili Powder", 400, "Clean sharp heat"),
+        ("White Pepper Powder", 400, "Earthy mild heat"),
+        ("Onion Granules", 400, "Textured robust savory"),
+        ("Green Peas Powder", 160, "Sweet protein-rich"),
+        ("Lemon Powder", 180, "Bright citrus tang"),
         ("Cardamom Powder", 480, "Sweet floral spice"),
         
-        
-        
-        
-        
-        
-        
-        
-    )
+    ])
 ]
 
 

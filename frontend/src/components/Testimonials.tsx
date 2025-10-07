@@ -137,24 +137,24 @@ const Testimonials = () => {
       transition={{ delay: 0.4, duration: 0.8 }}
     >
       <div className="bg-gradient-to-r from-orange-500 to-red-600 p-8 rounded-2xl text-white">
-        <h3 className="font-playfair text-2xl font-semibold mb-4">
+        {/* <h3 className="font-playfair text-2xl font-semibold mb-4">
           Join 500+ Happy Customers
         </h3>
         <p className="text-orange-100 mb-6">
           Experience the true taste of India with our premium traditional blends.
-        </p>
+        </p> */}
         <div className="flex justify-center items-center space-x-8">
           <div className="text-center">
-            <div className="text-3xl font-bold">4.9★</div>
-            <div className="text-sm text-orange-100">Average Rating</div>
+            {/* <div className="text-3xl font-bold">4.9★</div>
+            <div className="text-sm text-orange-100">Average Rating</div> */}
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold">100+</div>
-            <div className="text-sm text-orange-100">Reviews</div>
+            {/* <div className="text-3xl font-bold">100+</div>
+            <div className="text-sm text-orange-100">Reviews</div> */}
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold">97%</div>
-            <div className="text-sm text-orange-100">Satisfaction</div>
+            {/* <div className="text-3xl font-bold">97%</div> */}
+            {/* <div className="text-sm text-orange-100">Satisfaction</div> */}
           </div>
         </div>
       </div>

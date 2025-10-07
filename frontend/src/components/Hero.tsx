@@ -1,20 +1,19 @@
-// import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Star } from 'lucide-react';
+
 const Hero = () => {
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-orange-50 to-white">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-no-repeat"
         style={{
-          backgroundImage: 'url("/background_image.jpg")',
-          backgroundPosition: 'center  80%',
+          backgroundImage: 'url("/Home_page.jpg")',
+          backgroundPosition: 'center  75%',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
+        {/* <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div> */}
       </div>
-
       {/* Floating Spice Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(6)].map((_, i) => (
@@ -52,15 +51,15 @@ const Hero = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-2 mb-8"
+            className="inline-flex items-center space-x-2 bg-orange-100 text-orange-700 border border-orange-200 rounded-full px-6 py-2 mb-8 shadow-sm"
           >
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <span className="text-white text-sm font-medium">100% Certified</span>
+            <Star className="w-4 h-4 text-orange-500 fill-current" />
+            <span className="text-sm font-medium">100% Certified</span>
           </motion.div>
 
           {/* Main Heading */}
           <motion.h1
-            className="font-playfair text-5xl md:text-7xl font-bold text-white mb-6 leading-tight"
+            className="font-playfair text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
@@ -73,7 +72,7 @@ const Hero = () => {
 
           {/* Subtitle */}
           <motion.p
-            className="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto leading-relaxed"
+            className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
@@ -92,14 +91,13 @@ const Hero = () => {
               className="group bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center space-x-2"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => { window.location.hash = '/products'; }}
             >
               <span>Shop Now</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </motion.button>
             
             <motion.button
-              className="group border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-gray-800 transition-all duration-300 backdrop-blur-sm"
+              className="group border-2 border-orange-500 text-orange-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-50 transition-all duration-300"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -117,13 +115,12 @@ const Hero = () => {
             {[
               { number: '25+', label: 'Genuine Blends' },
               { number: '500+', label: 'Happy Customers' },
-              // { number: '25+', label: 'Years Heritage' }
             ].map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-white mb-2">
+                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                   {stat.number}
                 </div>
-                <div className="text-gray-300 text-sm md:text-base">
+                <div className="text-gray-600 text-sm md:text-base">
                   {stat.label}
                 </div>
               </div>
@@ -138,8 +135,8 @@ const Hero = () => {
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
       >
-        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white/70 rounded-full mt-2"></div>
+        <div className="w-6 h-10 border-2 border-orange-300 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-orange-400 rounded-full mt-2"></div>
         </div>
       </motion.div>
     </section>

@@ -1,15 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
-from .routes import leads as leads_router
-from .routes import products as products_router
-from .routes import auth as auth_router
+from .routes import auth, products, orders, cart
 from .database import Base, engine
 
-Base.metadata.create_all(bind=engine)  # for quick start; move to Alembic later
+# Create tables
+try:
+    Base.metadata.create_all(bind=engine)
+    print("✅ Database tables created successfully!")
+except Exception as e:
+    print(f"❌ Database connection failed: {e}")
 
-app = FastAPI(title="Nutrieve LMS API")
+app = FastAPI(title="Nutrieve API", version="1.0.0")
 
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
@@ -18,10 +22,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(leads_router.router)
-app.include_router(products_router.router)
-app.include_router(auth_router.router)
+# Include routers
+app.include_router(auth.router)
+app.include_router(products.router)
+app.include_router(orders.router)
+app.include_router(cart.router)
+
+@app.get("/")
+def read_root():
+    return {"message": "Nutrieve API is running", "status": "healthy"}
 
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {"status": "ok", "database": "connected"}

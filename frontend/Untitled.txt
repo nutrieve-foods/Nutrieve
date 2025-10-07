@@ -53,4 +53,4 @@ Have questions about our flavored powders? We'd love to hear from you!
 
 
 Pricing--> -
-
+python -m uvicorn app.main:app --reload
