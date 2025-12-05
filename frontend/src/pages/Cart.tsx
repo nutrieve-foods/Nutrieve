@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Minus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 
 type CartItem = {
   id: number;
@@ -21,7 +21,6 @@ export default function Cart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<number | null>(null);
-  const apiBase = ((import.meta as any).env?.VITE_API_URL as string) || 'http://localhost:8000';
 
   useEffect(() => {
     loadCart();
@@ -38,7 +37,7 @@ export default function Cart() {
         return;
       }
 
-      const response = await fetch(`${apiBase}/api/cart`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -66,7 +65,7 @@ export default function Cart() {
     setUpdating(itemId);
     try {
       const token = localStorage.getItem('nutrieve_token');
-      const response = await fetch(`${apiBase}/api/cart/${itemId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cart/${itemId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +95,7 @@ export default function Cart() {
     setUpdating(itemId);
     try {
       const token = localStorage.getItem('nutrieve_token');
-      const response = await fetch(`${apiBase}/api/cart/${itemId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cart/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -158,7 +157,7 @@ export default function Cart() {
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">{error}</div>
           <button
-            onClick={loadCart}
+            onClick={() => window.location.hash = 'products'}
             className="bg-orange-500 text-white px-6 py-2 rounded-xl hover:bg-orange-600 transition-colors"
           >
             Try Again
@@ -170,7 +169,7 @@ export default function Cart() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -185,7 +184,7 @@ export default function Cart() {
               Looks like you haven't added any items to your cart yet.
             </p>
             <button
-              onClick={() => window.location.hash = '/products'}
+              onClick={() => window.location.hash = 'products'}
               className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Start Shopping
@@ -197,7 +196,7 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -327,7 +326,7 @@ export default function Cart() {
               </div>
 
               <button
-                onClick={() => window.location.hash = '/address'}
+                onClick={() => window.location.hash = 'address'}
                 className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 mt-6"
               >
                 <span>Proceed to Checkout</span>
@@ -335,7 +334,7 @@ export default function Cart() {
               </button>
 
               <button
-                onClick={() => window.location.hash = '/products'}
+                onClick={() => window.location.hash = 'products'}
                 className="w-full border-2 border-orange-500 text-orange-600 py-3 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-300 mt-4"
               >
                 Continue Shopping

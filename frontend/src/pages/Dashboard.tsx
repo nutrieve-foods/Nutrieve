@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Package, MapPin, LogOut, ShoppingBag, Clock,  CheckCircle } from 'lucide-react';
+import { User, Package, MapPin, LogOut, ShoppingBag, Clock, CheckCircle } from 'lucide-react';
 
 type Order = {
   id: number;
@@ -165,6 +165,17 @@ export default function Dashboard() {
               <User className="w-5 h-5" />
               <span>Profile</span>
             </button>
+            <button
+              onClick={() => setActiveTab('edit-profile')}
+              className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-xl font-semibold transition-all ${
+                activeTab === 'edit-profile'
+                  ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <User className="w-5 h-5" />
+              <span>Edit Profile</span>
+            </button>
           </div>
         </motion.div>
 
@@ -188,7 +199,7 @@ export default function Dashboard() {
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">No Orders Yet</h3>
                 <p className="text-gray-500 mb-6">Start shopping to see your orders here</p>
                 <button
-                  onClick={() => window.location.hash = '/products'}
+                  onClick={() => window.location.hash = 'products'}
                   className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all"
                 >
                   Start Shopping
@@ -272,7 +283,9 @@ export default function Dashboard() {
               </div>
               
               <div className="pt-4">
-                <button className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all">
+                <button 
+                  onClick={() => setActiveTab('edit-profile')}
+                  className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all">
                   Edit Profile
                 </button>
               </div>
@@ -280,6 +293,69 @@ export default function Dashboard() {
           </motion.div>
         )}
 
+        {activeTab === 'edit-profile' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white rounded-2xl shadow-lg p-8"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-playfair text-2xl font-bold text-gray-800">Edit Profile</h2>
+              <button
+                onClick={() => setActiveTab('profile')}
+                className="text-gray-600 hover:text-orange-600 transition-colors"
+              >
+                ← Back to Profile
+              </button>
+            </div>
+            
+            <form className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                <input
+                  type="text"
+                  defaultValue={user.name}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <input
+                  type="email"
+                  defaultValue={user.email}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                <input
+                  type="tel"
+                  defaultValue={user.phone || ''}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all"
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('profile')}
+                  className="border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        )}
         {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -288,7 +364,7 @@ export default function Dashboard() {
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
         >
           <button
-            onClick={() => window.location.hash = '/products'}
+            onClick={() => window.location.hash = 'products'}
             className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all text-center group"
           >
             <ShoppingBag className="w-12 h-12 text-orange-500 mx-auto mb-3 group-hover:scale-110 transition-transform" />
@@ -297,7 +373,7 @@ export default function Dashboard() {
           </button>
           
           <button
-            onClick={() => window.location.hash = '/cart'}
+            onClick={() => window.location.hash = 'cart'}
             className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all text-center group"
           >
             <Package className="w-12 h-12 text-orange-500 mx-auto mb-3 group-hover:scale-110 transition-transform" />
@@ -305,10 +381,12 @@ export default function Dashboard() {
             <p className="text-gray-600 text-sm">Check your cart items</p>
           </button>
           
-          <button className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all text-center group">
-            <MapPin className="w-12 h-12 text-orange-500 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-            <h3 className="font-semibold text-gray-800 mb-2">Manage Addresses</h3>
-            <p className="text-gray-600 text-sm">Update delivery addresses</p>
+          <button 
+            onClick={() => window.location.hash = 'track-orders'}
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all text-center group">
+            <Package className="w-12 h-12 text-orange-500 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+            <h3 className="font-semibold text-gray-800 mb-2">Track Orders</h3>
+            <p className="text-gray-600 text-sm">Track your order status</p>
           </button>
         </motion.div>
       </div>

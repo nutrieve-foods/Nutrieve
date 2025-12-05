@@ -8,15 +8,15 @@ const FeaturedProducts = () => {
       name: "Onion Powder",
       price: "₹230",
       originalPrice: "₹399",
-      image: "/Onion Powder.jpg",
-      description: "Rich, savory depth in every sprinkle",
+      image: "/Onion_Powder.jpg",
+      description: "Intense savory depth",
     },
     {
       id: 2,
       name: "Tomato Powder",
       price: "₹185",
       originalPrice: "₹329",
-      image: "/Tomato Powder.jpg",
+      image: "/Tomato_Powder.jpg",
       description: "Tangy zest for sauces and soups",
     },
     {
@@ -24,7 +24,7 @@ const FeaturedProducts = () => {
       name: "Garlic Powder",
       price: "₹375",
       originalPrice: "₹359",
-      image: "/Garlic Powder.jpg",
+      image: "/Garlic_Powder.jpg",
       description: "Bold aroma for instant flavor",
     },
     {
@@ -32,7 +32,7 @@ const FeaturedProducts = () => {
       name: "Lemon Powder",
       price: "₹180",
       originalPrice: "₹299",
-      image: "/Lemon Powder.jpg",
+      image: "/Lemon_Powder.jpg",
       description: "Citrusy brightness in a dash",
     },
   ];
@@ -152,12 +152,10 @@ const FeaturedProducts = () => {
           transition={{ delay: 0.4, duration: 0.8 }}
         >
           <motion.button
-            className="group inline-flex items-center space-x-2 border-2 border-orange-500 text-orange-600 px-8 py-3 rounded-full font-semibold hover:bg-orange-500 hover:text-white transition-all duration-300"
+            className="group inline-flex items-center space-x-2 bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-500 hover:text-white transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              window.location.hash = "/products";
-            }}
+           onClick={() => { window.location.hash = 'products'; }}
           >
             <span>View All Products</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

@@ -121,7 +121,7 @@ export default function ProductDetail({ productId, onBack }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <motion.button
@@ -149,10 +149,6 @@ export default function ProductDetail({ productId, onBack }: Props) {
               />
               
               {/* Organic Badge */}
-              <div className="absolute top-12 left-12 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
-                <Leaf className="w-4 h-4" />
-                <span>100% Organic</span>
-              </div>
             </div>
           </motion.div>
 
@@ -175,6 +171,16 @@ export default function ProductDetail({ productId, onBack }: Props) {
               <p className="text-gray-600 text-lg leading-relaxed mb-6">
                 {product.description}
               </p>
+             
+             {/* 📍 ADD YOUR PRODUCT DESCRIPTIONS HERE 📍 */}
+             {/* Example: */}
+             {/* <div className="bg-orange-50 rounded-xl p-4 mb-6">
+               <h4 className="font-semibold text-gray-800 mb-2">Product Details:</h4>
+               <p className="text-gray-600 text-sm leading-relaxed">
+                 Add your detailed product description here. This is where you can add 
+                 information about ingredients, usage instructions, benefits, etc.
+               </p>
+             </div> */}
 
               {/* Rating */}
               <div className="flex items-center space-x-2 mb-6">

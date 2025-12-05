@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-
 type Props = { onSignedIn?: () => void };
 
 export default function Login({ onSignedIn }: Props) {
@@ -9,7 +8,6 @@ export default function Login({ onSignedIn }: Props) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -46,7 +44,7 @@ export default function Login({ onSignedIn }: Props) {
           className="bg-white rounded-2xl shadow-lg p-8"
         >
           <div className="text-center mb-8">
-            <h2 className="font-playfair text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+            <h2 className="font-playfair text-3xl font-bold text-gray-800 mb-2">Welcome</h2>
             <p className="text-gray-600">Sign in to your Nutrieve account</p>
           </div>
 
@@ -80,6 +78,15 @@ export default function Login({ onSignedIn }: Props) {
                 />
               </div>
             </div>
+            <div className="text-right">
+              <button
+                onClick={() => (window.location.hash = "forgot-password")}
+                className="text-sm text-orange-600 hover:text-orange-700"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
 
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -107,7 +114,7 @@ export default function Login({ onSignedIn }: Props) {
             <p className="text-gray-600">
               Don't have an account?{' '}
               <button
-                onClick={() => window.location.hash = '/signup'}
+                onClick={() => (window.location.hash = "signup")}
                 className="text-orange-600 hover:text-orange-700 font-semibold"
               >
                 Sign up

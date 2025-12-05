@@ -3,23 +3,28 @@ import { ArrowRight, Star } from 'lucide-react';
 
 const Hero = () => {
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-orange-50 to-white">
+    <section
+      id="home"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-orange-50 to-white"
+    >
       {/* Background Image */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-no-repeat"
         style={{
-          backgroundImage: 'url("/Home_page.jpg")',
-          backgroundPosition: 'center  75%',
+          backgroundImage: 'url("/Home_page_new.png")',
+          backgroundPosition: 'center 75%',
         }}
       >
-        {/* <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div> */}
+        {/* Soft white overlay for text contrast */}
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px]"></div>
       </div>
+
       {/* Floating Spice Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-4 h-4 bg-orange-400/30 rounded-full"
+            className="absolute w-4 h-4 bg-orange-300/40 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -27,12 +32,12 @@ const Hero = () => {
             animate={{
               y: [-20, 20, -20],
               x: [-10, 10, -10],
-              opacity: [0.3, 0.7, 0.3],
+              opacity: [0.3, 0.8, 0.3],
             }}
             transition={{
               duration: 4 + Math.random() * 2,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
           />
         ))}
@@ -59,13 +64,13 @@ const Hero = () => {
 
           {/* Main Heading */}
           <motion.h1
-            className="font-playfair text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight"
+            className="font-playfair text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
             Authentic Indian
-            <span className="block bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
               Powders
             </span>
           </motion.h1>
@@ -77,7 +82,8 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
-            Discover the pure essence of traditional Indian flavors, blended with centuries-old recipes for authentic flavors.
+            Discover the pure essence of traditional Indian flavors — crafted with
+            passion, purity, and timeless recipes.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -88,16 +94,17 @@ const Hero = () => {
             transition={{ delay: 0.8, duration: 0.8 }}
           >
             <motion.button
-              className="group bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center space-x-2"
+              className="group bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-md hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => (window.location.hash = 'products')}
             >
               <span>Shop Now</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </motion.button>
-            
+
             <motion.button
-              className="group border-2 border-orange-500 text-orange-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-50 transition-all duration-300"
+              className="group border-2 border-orange-400 text-orange-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-100 transition-all duration-300"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -117,10 +124,10 @@ const Hero = () => {
               { number: '500+', label: 'Happy Customers' },
             ].map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                <div className="text-3xl md:text-4xl font-bold text-orange-600 mb-2">
                   {stat.number}
                 </div>
-                <div className="text-gray-600 text-sm md:text-base">
+                <div className="text-gray-700 text-sm md:text-base">
                   {stat.label}
                 </div>
               </div>

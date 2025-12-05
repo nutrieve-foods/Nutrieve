@@ -44,11 +44,12 @@ export default function AddressForm({ onBack, onNext }: Props) {
       // Save address to backend
       const token = localStorage.getItem('nutrieve_token');
       if (!token) {
-        window.location.hash = '/login';
+        window.location.hash = 'login';
         return;
       }
       
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/api/orders/addresses`, {
+      const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/orders/addresses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +64,11 @@ export default function AddressForm({ onBack, onNext }: Props) {
       }
 
       const savedAddress = await response.json();
+      console.log('Address saved successfully:', savedAddress);
+      
+      // Call onNext callback and redirect to payment page
       onNext(savedAddress);
+      window.location.hash = 'payment';
     } catch (err: any) {
       console.error('Address creation error:', err);
       setError(err.message || 'Failed to save address');

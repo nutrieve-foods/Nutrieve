@@ -20,41 +20,51 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
   const handlePayment = async () => {
     setLoading(true);
     setError(null);
-
+  
     try {
-      const token = localStorage.getItem('nutrieve_token');
-      
-      // Create order first
-      const orderResponse = await fetch(`${(import.meta as any).env.VITE_API_URL}/api/orders/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          address_id: orderData.address.id
-        })
-      });
-
+      const token = localStorage.getItem("nutrieve_token");
+  
+      // 1️⃣ Create order with full details for testing
+      const orderResponse = await fetch(
+        `${(import.meta as any).env.VITE_API_URL}/api/orders/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            address_id: orderData.address.id,
+            items: orderData.items.map((item: any) => ({
+              product_id: item.product_id,
+              size: item.size,
+              quantity: item.quantity,
+            })),
+            total_amount: orderData.total,
+            payment_status: "completed", // ✅ Mark payment completed
+          }),
+        }
+      );
+  
       if (!orderResponse.ok) {
         const errorData = await orderResponse.text();
-        throw new Error(`Failed to create order: ${errorData}`);
+        throw new Error(errorData || "Failed to create order");
       }
-
+  
       const order = await orderResponse.json();
-
-      // For now, simulate payment success
-      // In production, integrate with PhonePe API
+  
+      // 2️⃣ Simulate payment success
       setTimeout(() => {
         onSuccess(order.id);
-      }, 2000);
-
+      }, 1000);
     } catch (err: any) {
-      console.error('Payment error:', err);
-      setError(err.message || 'Payment failed');
+      console.error("Payment error:", err);
+      setError(err.message || "Payment failed");
+    } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
@@ -170,36 +180,6 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
                 </div>
               </div>
 
-              {/* Cash on Delivery */}
-              <div
-                className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                  paymentMethod === 'cod' 
-                    ? 'border-orange-500 bg-orange-50' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => setPaymentMethod('cod')}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">COD</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Cash on Delivery</h4>
-                    <p className="text-sm text-gray-600">Pay when you receive</p>
-                  </div>
-                  <div className="ml-auto">
-                    <div className={`w-4 h-4 rounded-full border-2 ${
-                      paymentMethod === 'cod' 
-                        ? 'border-orange-500 bg-orange-500' 
-                        : 'border-gray-300'
-                    }`}>
-                      {paymentMethod === 'cod' && (
-                        <div className="w-full h-full rounded-full bg-white scale-50"></div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Security Info */}
@@ -239,24 +219,31 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
           >
             <h3 className="font-playfair text-xl font-bold text-gray-800 mb-6">Order Summary</h3>
             
-            {/* Items */}
+            {/* Order Details */}
             <div className="space-y-4 mb-6">
-              {orderData.items.map((item, index) => (
-                <div key={index} className="flex items-center space-x-4">
-                  <img
-                    src={item.image || '/background_image.jpg'}
-                    alt={item.name}
-                    className="w-16 h-16 object-cover rounded-lg"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-800">{item.name}</h4>
-                    <p className="text-sm text-gray-600">{item.size} × {item.quantity}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-800">₹{item.total}</p>
-                  </div>
-                </div>
-              ))}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-semibold">₹{(orderData.total / 1.18).toFixed(0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">GST (18%)</span>
+                <span className="font-semibold">₹{(orderData.total - (orderData.total / 1.18)).toFixed(0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Shipping</span>
+                <span className="font-semibold text-green-600">
+                  {orderData.total >= 500 ? 'Free' : '₹50'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Discount</span>
+                <span className="font-semibold text-green-600">₹0</span>
+              </div>
+              <hr className="my-4" />
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total Amount</span>
+                <span>₹{orderData.total}</span>
+              </div>
             </div>
 
             {/* Delivery Address */}
@@ -268,14 +255,6 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
                 {orderData.address.landmark && <p>{orderData.address.landmark}</p>}
                 <p>{orderData.address.city}, {orderData.address.state} - {orderData.address.pincode}</p>
                 <p>{orderData.address.phone}</p>
-              </div>
-            </div>
-
-            {/* Total */}
-            <div className="border-t pt-6">
-              <div className="flex justify-between items-center text-lg font-bold text-gray-800">
-                <span>Total Amount</span>
-                <span>₹{orderData.total}</span>
               </div>
             </div>
           </motion.div>

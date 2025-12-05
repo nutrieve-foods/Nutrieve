@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 from ..deps.db import get_db
 from ..models import User
 from ..schema import UserCreate, UserLogin, User as UserSchema
-
+from fastapi import Body
+import random
+from app.utils.email_service import send_email
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 # Security
@@ -35,23 +37,39 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+):
+    token = credentials.credentials
+
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
-        if email is None:
-            raise credentials_exception
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token payload",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
     except JWTError:
-        raise credentials_exception
-    
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     user = db.query(User).filter(User.email == email).first()
-    if user is None:
-        raise credentials_exception
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     return user
 
 @router.post("/signup")
@@ -129,6 +147,57 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
+
+@router.post("/forgot-password")
+def forgot_password(data: dict = Body(...), db: Session = Depends(get_db)):
+    email = data.get("email", "").strip()
+
+    user = db.query(User).filter(User.email.ilike(email)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Email not registered")
+
+    otp = str(random.randint(100000, 999999))
+    expiry = datetime.utcnow() + timedelta(minutes=10)
+
+    user.reset_code = otp
+    user.reset_expiry = expiry
+    db.commit()
+
+    send_email(
+    to_email=email,
+    subject="Your Nutrieve Password Reset Code",
+    body=f"Your OTP for resetting your Nutrieve password is: {otp}\nThis code will expire in 10 minutes."
+)
+
+
+    return {"message": "OTP sent to email"}
+
+
+@router.post("/reset-password")
+def reset_password(data: dict = Body(...), db: Session = Depends(get_db)):
+    email = data.get("email", "").strip()
+    otp = data.get("otp")
+    new_password = data.get("new_password")
+
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Email not registered")
+
+    if not user.reset_code or user.reset_code != otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+
+    if datetime.utcnow() > user.reset_expiry:
+        raise HTTPException(status_code=400, detail="OTP expired")
+
+    hashed_password = get_password_hash(new_password)
+
+    user.password = hashed_password
+    user.reset_code = None
+    user.reset_expiry = None
+    db.commit()
+
+    return {"message": "Password reset successful"}
 
 @router.get("/me", response_model=UserSchema)
 def get_current_user_info(current_user: User = Depends(get_current_user)):

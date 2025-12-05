@@ -39,7 +39,8 @@ class User(Base):
     role = Column(String, default="customer")
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+    reset_code = Column(String, nullable=True)
+    reset_expiry = Column(DateTime, nullable=True)
     # Relationships
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user")

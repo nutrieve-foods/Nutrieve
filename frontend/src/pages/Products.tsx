@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ListFilter as Filter, Star, Eye } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
 
 type Product = { id: number; name: string; price: number; image?: string | null; description?: string };
 
@@ -12,24 +10,80 @@ type Props = {
 
 export default function Products({ onProductSelect }: Props) {
   const [items, setItems] = useState<Product[]>([]);
-  const { cart, setCart } = useCart();
+  const [cart, setCart] = useState<Record<number, number>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // ✅ added navigation hook
+  const [error, setError] = useState<string | null>(null);
+  const [addingToCart, setAddingToCart] = useState<number | null>(null);
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const base = ((import.meta as any).env?.VITE_API_URL as string) || 'http://localhost:8000';
-      const r = await fetch(base + '/api/products');
-      setItems(await r.json());
-      setLoading(false);
-    })();
+    loadProducts();
   }, []);
 
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      console.log('Loading products from:', apiUrl + '/api/products');
+      
+      const response = await fetch(apiUrl + '/api/products');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Products loaded:', data);
+      setItems(data);
+    } catch (err: any) {
+      console.error('Failed to load products:', err);
+      setError(err.message || 'Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addToCart = async (productId: number) => {
+    const token = localStorage.getItem('nutrieve_token');
+    if (!token) {
+      window.location.hash = 'login';
+      return;
+    }
+
+    setAddingToCart(productId);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/cart/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          product_id: productId,
+          quantity: 1,
+          size: '200gm'
+        })
+      });
+
+      if (response.ok) {
+        setCart(c => ({ ...c, [productId]: (c[productId] || 0) + 1 }));
+      } else {
+        throw new Error('Failed to add to cart');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add product to cart');
+    } finally {
+      setAddingToCart(null);
+    }
+  };
+
   function inc(id: number) {
-    setCart(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
+    addToCart(id);
   }
   function dec(id: number) {
     setCart(c => {
@@ -60,13 +114,32 @@ export default function Products({ onProductSelect }: Props) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Error: {error}</div>
+          <button
+            onClick={loadProducts}
+            className="bg-orange-500 text-white px-6 py-2 rounded-xl hover:bg-orange-600 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -146,10 +219,10 @@ export default function Products({ onProductSelect }: Props) {
                 >
                   <Eye className="w-4 h-4" />
                 </button>
-
+{/* 
                 <div className="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
                   Organic
-                </div>
+                </div> */}
               </div>
 
               <div className="p-6 space-y-3">
@@ -161,17 +234,17 @@ export default function Products({ onProductSelect }: Props) {
                   {p.description || 'Premium quality organic powder for authentic flavors'}
                 </p>
 
-                <div className="flex items-center space-x-1">
+                {/* <div className="flex items-center space-x-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
                   ))}
                   <span className="text-sm text-gray-600 ml-2">(4.9)</span>
-                </div>
+                </div> */}
 
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-2xl font-bold text-gray-800">₹{p.price}</div>
-                    <div className="text-sm text-gray-500">200g pack</div>
+                    <div className="text-sm text-gray-500">1000g pack</div>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -193,10 +266,10 @@ export default function Products({ onProductSelect }: Props) {
 
                 <div className="flex gap-2">
                   <button
+                   onClick={() => onProductSelect?.(p.id.toString())}
                     className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all"
-                    onClick={() => onProductSelect?.(p.id.toString())}
                   >
-                    View Details
+                   View Details
                   </button>
                 </div>
               </div>
@@ -218,13 +291,13 @@ export default function Products({ onProductSelect }: Props) {
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => navigate('/cart')}
+                  onClick={() => window.location.hash = '/cart'}
                   className="bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-semibold hover:bg-gray-200 transition-all"
                 >
                   View Cart
                 </button>
                 <button
-                  onClick={() => navigate('/address')}
+                  onClick={() => window.location.hash = 'address'}
                   className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all"
                 >
                   Checkout
@@ -237,3 +310,5 @@ export default function Products({ onProductSelect }: Props) {
     </div>
   );
 }
+
+

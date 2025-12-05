@@ -19,6 +19,14 @@ import Leads from './pages/Leads';
 import AddressForm from './pages/AddressForm';
 import Payment from './pages/Payment';
 import OrderSuccess from './pages/OrderSuccess';
+import TrackOrders from './pages/TrackOrders';
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import ReturnsPolicy from './pages/ReturnsPolicy';
+import ShippingInfo from './pages/ShippingInfo';
+import Disclaimer from './pages/Disclaimer';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -101,6 +109,10 @@ function App() {
         return <Login onSignedIn={handleAuthSuccess} />;
       case 'signup':
         return <Signup onSignedUp={handleAuthSuccess} />;
+      case 'forgot-password':
+        return <ForgotPassword />;
+      case 'reset-password':
+        return <ResetPassword />;
       case 'products':
         return <Products onProductSelect={handleProductSelect} />;
       case 'product-detail':
@@ -109,10 +121,28 @@ function App() {
         ) : (
           <Products onProductSelect={handleProductSelect} />
         );
+      case "privacy-policy":
+        return <PrivacyPolicy />;
+
+      case "terms":
+        return <TermsOfService />;
+
+      case "returns":
+        return <ReturnsPolicy />;
+
+      case "shipping":
+        return <ShippingInfo />;
+
+      case "disclaimer":
+        return <Disclaimer />;
+
       case 'cart':
         return <Cart />;
       case 'checkout':
-        return <Checkout />;
+        return <AddressForm 
+          onBack={() => window.location.hash = 'cart'}
+          onNext={handleAddressNext}
+        />;
       case 'dashboard':
         return user ? <Dashboard /> : <Login onSignedIn={handleAuthSuccess} />;
       case 'leads':
@@ -125,24 +155,21 @@ function App() {
           />
         );
       case 'payment':
-        return selectedAddress ? (
+        return (
           <Payment
             orderData={{
-              address: selectedAddress,
+              address: selectedAddress || {},
               items: [],
               total: 0,
             }}
             onBack={() => setCurrentPage('address')}
             onSuccess={handlePaymentSuccess}
           />
-        ) : (
-          <AddressForm
-            onBack={() => window.location.hash = 'cart'}
-            onNext={handleAddressNext}
-          />
         );
       case 'order-success':
         return orderId ? <OrderSuccess orderId={orderId} /> : <Dashboard />;
+      case 'track-orders':
+        return <TrackOrders />;
       case 'home':
       default:
         return (
@@ -163,7 +190,7 @@ function App() {
       <div className="min-h-screen">
         <Header user={user} setUser={setUser} />
         <main>{renderPage()}</main>
-        {currentPage === 'home' && <Footer />}
+        { <Footer />}
       </div>
     </CartProvider>
   );
