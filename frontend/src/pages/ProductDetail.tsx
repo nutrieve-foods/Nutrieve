@@ -30,60 +30,52 @@ export default function ProductDetail({ productId, onBack }: Props) {
   const loadProduct = async () => {
     setLoading(true);
     try {
-      const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
       const response = await fetch(`${apiUrl}/api/products`);
       const products = await response.json();
-      const foundProduct = products.find((p: Product) => p.id === parseInt(productId));
-      setProduct(foundProduct || null);
-    } catch (error) {
-      console.error('Failed to load product:', error);
+      const found = products.find((p: Product) => p.id === parseInt(productId));
+      setProduct(found || null);
+    } catch (e) {
+      console.error("Failed to load", e);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculatePrice = (basePrice: number, size: string): number => {
-    const multipliers: Record<string, number> = {
-      '200gm': 0.2,
-      '500gm': 0.5,
-      '1kg': 1.0
-    };
-    return basePrice * (multipliers[size] || 1.0);
+  const calculatePrice = (base: number, size: string) => {
+    const multiplier: any = { "200gm": 0.2, "500gm": 0.5, "1kg": 1.0 };
+    return base * (multiplier[size] || 1);
   };
 
   const addToCart = async () => {
     if (!product) return;
-    
+
     setAddingToCart(true);
     try {
-      const token = localStorage.getItem('nutrieve_token');
+      const token = localStorage.getItem("nutrieve_token");
       if (!token) {
-        window.location.hash = '/login';
+        window.location.hash = "login";
         return;
       }
 
-      const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiUrl}/api/cart/add`, {
-        method: 'POST',
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      await fetch(`${apiUrl}/api/cart/add`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           product_id: product.id,
-          quantity: quantity,
-          size: selectedSize
-        })
+          quantity,
+          size: selectedSize,
+        }),
       });
 
-      if (response.ok) {
-        alert('Product added to cart successfully!');
-      } else {
-        throw new Error('Failed to add to cart');
-      }
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      alert('Failed to add product to cart');
+      alert("Product added to cart!");
+    } catch (e) {
+      console.error(e);
+      alert("Failed adding to cart");
     } finally {
       setAddingToCart(false);
     }
@@ -91,29 +83,27 @@ export default function ProductDetail({ productId, onBack }: Props) {
 
   const buyNow = async () => {
     await addToCart();
-    if (!addingToCart) {
-      window.location.hash = '/cart';
-    }
+    if (!addingToCart) window.location.hash = "/cart";
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-orange-50">
+        <div className="animate-spin h-20 w-20 border-b-2 border-orange-500 rounded-full" />
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Product Not Found</h2>
+      <div className="min-h-screen flex items-center justify-center bg-orange-50">
+        <div>
+          <h2 className="text-xl font-bold">Product Not Found</h2>
           <button
             onClick={onBack}
-            className="bg-orange-500 text-white px-6 py-2 rounded-xl hover:bg-orange-600 transition-colors"
+            className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-xl"
           >
-            Back to Products
+            Back
           </button>
         </div>
       </div>
@@ -121,170 +111,142 @@ export default function ProductDetail({ productId, onBack }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-24">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 pt-20 pb-10">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
+
         {/* Back Button */}
         <motion.button
           onClick={onBack}
-          className="flex items-center space-x-2 text-gray-600 hover:text-orange-600 transition-colors mb-8"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center space-x-2 text-gray-600 hover:text-orange-600 mb-4"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Back to Products</span>
+          <span>Back</span>
         </motion.button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Image */}
+        {/* GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+          {/* IMAGE SECTION */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             className="relative"
           >
-            <div className="bg-white rounded-2xl shadow-lg p-8 sticky top-8">
+            <div
+              className="
+                bg-white rounded-xl shadow-lg p-4 
+                sticky top-4 
+              "
+            >
+              {/* FULL WIDTH MOBILE IMAGE */}
               <img
-                src={product.image || '/background_image.jpg'}
+                src={product.image || "/background_image.jpg"}
                 alt={product.name}
-                className="w-full h-96 object-cover rounded-xl"
+                className="
+                  rounded-xl 
+                  w-full 
+                  h-72 sm:h-96 object-cover 
+                  md:rounded-2xl
+                "
               />
-              
-              {/* Organic Badge */}
             </div>
           </motion.div>
 
-          {/* Product Details */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-6"
-          >
-            {/* Product Info */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <div className="mb-4">
-                <span className="text-orange-600 text-sm font-medium">{product.category}</span>
-              </div>
-              
-              <h1 className="font-playfair text-3xl font-bold text-gray-800 mb-4">
+          {/* DETAILS SECTION */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+
+            {/* Title, description */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <h1 className="font-playfair text-3xl font-bold text-gray-800 mb-3">
                 {product.name}
               </h1>
-              
-              <p className="text-gray-600 text-lg leading-relaxed mb-6">
+
+              <p className="text-gray-600 leading-relaxed">
                 {product.description}
               </p>
-             
-             {/* 📍 ADD YOUR PRODUCT DESCRIPTIONS HERE 📍 */}
-             {/* Example: */}
-             {/* <div className="bg-orange-50 rounded-xl p-4 mb-6">
-               <h4 className="font-semibold text-gray-800 mb-2">Product Details:</h4>
-               <p className="text-gray-600 text-sm leading-relaxed">
-                 Add your detailed product description here. This is where you can add 
-                 information about ingredients, usage instructions, benefits, etc.
-               </p>
-             </div> */}
 
-              {/* Rating */}
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <span className="text-gray-600">(4.9) • 234 reviews</span>
+              {/* STARS */}
+              <div className="flex items-center space-x-2 mt-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
+                <span className="text-gray-600">(4.9)</span>
               </div>
+            </div>
 
-              {/* Size Selection */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Select Size</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {['200gm', '500gm', '1kg'].map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`p-4 border-2 rounded-xl text-center transition-all ${
-                        selectedSize === size
-                          ? 'border-orange-500 bg-orange-50 text-orange-600'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="font-semibold">{size}</div>
-                      <div className="text-sm text-gray-600">
-                        ₹{calculatePrice(product.price, size).toFixed(0)}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quantity Selection */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Quantity</h3>
-                <div className="flex items-center space-x-4">
+            {/* SIZE SELECTOR */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-3">Select Size</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {["200gm", "500gm", "1kg"].map((s) => (
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                    key={s}
+                    onClick={() => setSelectedSize(s)}
+                    className={`
+                      p-4 rounded-xl border-2 text-center
+                      ${selectedSize === s
+                        ? "border-orange-500 bg-orange-50 text-orange-600"
+                        : "border-gray-200"
+                      }
+                    `}
                   >
-                    -
+                    <div className="font-semibold">{s}</div>
+                    <div className="text-gray-600 text-sm">₹{calculatePrice(product.price, s)}</div>
                   </button>
-                  <span className="text-xl font-semibold w-8 text-center">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                  >
-                    +
-                  </button>
-                </div>
+                ))}
               </div>
+            </div>
 
-              {/* Price */}
-              <div className="mb-8">
-                <div className="text-3xl font-bold text-gray-800">
-                  ₹{(calculatePrice(product.price, selectedSize) * quantity).toFixed(0)}
-                </div>
-                <div className="text-sm text-gray-600">
-                  ₹{calculatePrice(product.price, selectedSize).toFixed(0)} per {selectedSize}
-                </div>
-              </div>
+            {/* QUANTITY */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-3">Quantity</h3>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex items-center gap-4">
                 <button
-                  onClick={addToCart}
-                  disabled={addingToCart}
-                  className="flex-1 bg-white border-2 border-orange-500 text-orange-600 py-4 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center"
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  <span>{addingToCart ? 'Adding...' : 'Add to Cart'}</span>
+                  -
                 </button>
-                
+
+                <span className="text-xl font-semibold">{quantity}</span>
+
                 <button
-                  onClick={buyNow}
-                  disabled={addingToCart}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50"
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center"
                 >
-                  <Zap className="w-5 h-5" />
-                  <span>Buy Now</span>
+                  +
                 </button>
               </div>
             </div>
 
-            {/* Features */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Why Choose This Product?</h3>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Shield className="w-6 h-6 text-green-500" />
-                  <span className="text-gray-700">100% Pure & Natural</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Heart className="w-6 h-6 text-red-500" />
-                  <span className="text-gray-700">Rich in Nutrients</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Leaf className="w-6 h-6 text-green-500" />
-                  <span className="text-gray-700">Organically Sourced</span>
-                </div>
+            {/* PRICE */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <div className="text-3xl font-bold">
+                ₹{(calculatePrice(product.price, selectedSize) * quantity).toFixed(0)}
+              </div>
+              <div className="text-gray-600 text-sm">
+                ₹{calculatePrice(product.price, selectedSize)} per {selectedSize}
               </div>
             </div>
+
+            {/* BUTTONS */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={addToCart}
+                className="flex-1 py-4 border-2 border-orange-500 rounded-xl text-orange-600 font-semibold"
+              >
+                Add to Cart
+              </button>
+
+              <button
+                onClick={buyNow}
+                className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-semibold"
+              >
+                Buy Now
+              </button>
+            </div>
+
           </motion.div>
         </div>
       </div>

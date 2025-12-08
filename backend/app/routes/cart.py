@@ -3,15 +3,19 @@ from sqlalchemy.orm import Session
 from typing import List
 from ..deps.db import get_db
 from ..models import CartItem, Product, User
-from ..schema import CartItem as CartItemSchema, CartItemCreate
+from ..schema import CartItem as CartItemSchema, CartItemCreate, CartItemUpdate
 from ..routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/cart", tags=["cart"])
 
 @router.get("", response_model=List[CartItemSchema])
 def get_cart(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Get user's cart items"""
-    cart_items = db.query(CartItem).filter(CartItem.user_id == current_user.id).all()
+    cart_items = (
+        db.query(CartItem)
+        .join(Product, CartItem.product_id == Product.id)
+        .filter(CartItem.user_id == current_user.id)
+        .all()
+    )
     return cart_items
 
 @router.post("/add")
@@ -55,7 +59,7 @@ def add_to_cart(
 @router.put("/{item_id}")
 def update_cart_item(
     item_id: int,
-    quantity: int,
+    update_data: CartItemUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -68,10 +72,10 @@ def update_cart_item(
     if not cart_item:
         raise HTTPException(status_code=404, detail="Cart item not found")
     
-    if quantity <= 0:
+    if update_data.quantity <= 0:
         db.delete(cart_item)
     else:
-        cart_item.quantity = quantity
+        cart_item.quantity = update_data.quantity
     
     db.commit()
     return {"message": "Cart updated successfully"}

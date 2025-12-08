@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .core.config import settings
-from .routes import auth, products, orders, cart
-from .database import Base, engine
+
+from app.core.config import settings
+from app.routes import auth, products, orders, cart
+from app.database import Base, engine
 
 # Create tables
 try:
@@ -22,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# Include routers (IMPORTANT)
 app.include_router(auth.router)
 app.include_router(products.router)
 app.include_router(orders.router)

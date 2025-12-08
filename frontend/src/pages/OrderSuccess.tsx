@@ -1,11 +1,33 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Package, Home, Download } from 'lucide-react';
+import { CheckCircle, Package, Home } from 'lucide-react';
 
 type Props = {
   orderId: number;
 };
 
 export default function OrderSuccess({ orderId }: Props) {
+  // Send confirmation email with invoice on mount
+  useEffect(() => {
+    const sendEmail = async () => {
+      try {
+        const token = localStorage.getItem('nutrieve_token');
+        if (!token) return;
+
+        await fetch(`${(import.meta as any).env.VITE_API_URL}/api/orders/${orderId}/send-confirmation`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (err) {
+        console.error('Failed to send confirmation email', err);
+      }
+    };
+
+    sendEmail();
+  }, [orderId]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,31 +107,18 @@ export default function OrderSuccess({ orderId }: Props) {
             className="flex flex-col sm:flex-row gap-4"
           >
             <button
-              onClick={() => window.location.hash = '/dashboard'}
+              onClick={() => window.location.hash = 'track-orders'}
               className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
             >
               <Package className="w-5 h-5" />
               <span>Track Order</span>
             </button>
             <button
-              onClick={() => window.location.hash = '/products'}
+              onClick={() => window.location.hash = 'products'}
               className="flex-1 border-2 border-orange-500 text-orange-600 py-3 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-300 flex items-center justify-center space-x-2"
             >
               <Home className="w-5 h-5" />
               <span>Continue Shopping</span>
-            </button>
-          </motion.div>
-
-          {/* Download Invoice */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="mt-8 pt-6 border-t"
-          >
-            <button className="text-gray-600 hover:text-orange-600 transition-colors flex items-center space-x-2 mx-auto">
-              <Download className="w-4 h-4" />
-              <span className="text-sm">Download Invoice</span>
             </button>
           </motion.div>
         </motion.div>

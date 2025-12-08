@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Plus, Minus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
+import { Plus, Minus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 
 type CartItem = {
   id: number;
@@ -133,14 +133,12 @@ export default function Cart() {
     return cartItems.reduce((total, item) => total + calculateItemTotal(item), 0);
   };
 
-  const calculateTax = (subtotal: number): number => {
-    return subtotal * 0.18; // 18% GST
-  };
+  const calculateCGST = (subtotal: number): number => subtotal * 0.025;
+  const calculateSGST = (subtotal: number): number => subtotal * 0.025;
 
   const calculateTotal = (): number => {
     const subtotal = calculateSubtotal();
-    const tax = calculateTax(subtotal);
-    return subtotal + tax;
+    return subtotal + calculateCGST(subtotal) + calculateSGST(subtotal);
   };
 
   if (loading) {
@@ -227,66 +225,78 @@ export default function Cart() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex items-center space-x-4 p-4 border border-gray-100 rounded-xl hover:shadow-md transition-shadow"
+                    className="grid grid-cols-3 gap-3 p-4 border border-gray-100 rounded-xl hover:shadow-md transition-shadow"
                   >
-                    {/* Product Image */}
-                    <img
-                      src={item.product.image || '/background_image.jpg'}
-                      alt={item.product.name}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
-
-                    {/* Product Details */}
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 text-lg">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-gray-600 text-sm">
-                        {item.product.description || 'Premium organic powder'}
-                      </p>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <span className="text-sm font-medium text-orange-600">
-                          Size: {item.size}
-                        </span>
-                        <span className="text-lg font-bold text-gray-800">
-                          ₹{calculatePrice(item.product.base_price, item.size).toFixed(0)}
-                        </span>
-                      </div>
+                    {/* IMAGE LEFT */}
+                    <div className="col-span-1 flex justify-center">
+                      <img
+                        src={item.product.image || '/background_image.jpg'}
+                        alt={item.product.name}
+                        className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg"
+                      />
                     </div>
 
-                    {/* Quantity Controls */}
-                    <div className="flex items-center space-x-3">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        disabled={updating === item.id}
-                        className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors disabled:opacity-50"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-8 text-center font-semibold">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        disabled={updating === item.id}
-                        className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors disabled:opacity-50"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
+                    {/* NAME + SIZE + PRICE */}
+                    <div className="col-span-2 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-semibold text-gray-800 text-md leading-tight">
+                          {item.product.name}
+                        </h3>
 
-                    {/* Item Total */}
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-gray-800">
-                        ₹{calculateItemTotal(item).toFixed(0)}
+                        <p className="text-gray-500 text-xs mt-1 line-clamp-2">
+                          {item.product.description || 'Premium organic powder'}
+                        </p>
+
+                        <div className="flex items-center gap-4 mt-2">
+                          <span className="text-xs font-medium text-orange-600">
+                            Size: {item.size}
+                          </span>
+
+                          <span className="text-lg font-bold text-gray-800">
+                            ₹{calculatePrice(item.product.base_price, item.size).toFixed(0)}
+                          </span>
+                        </div>
                       </div>
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        disabled={updating === item.id}
-                        className="text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+
+                      {/* QUANTITY + REMOVE + TOTAL */}
+                      <div className="flex justify-between items-center mt-3">
+                        
+                        {/* Qty Buttons */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            disabled={updating === item.id}
+                            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+
+                          <span className="w-6 text-center font-semibold">{item.quantity}</span>
+
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            disabled={updating === item.id}
+                            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {/* TOTAL + DELETE */}
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-gray-800">
+                            ₹{calculateItemTotal(item).toFixed(0)}
+                          </div>
+
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            disabled={updating === item.id}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4 inline-block" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -304,15 +314,18 @@ export default function Cart() {
               <h3 className="font-playfair text-xl font-bold text-gray-800 mb-6">
                 Order Summary
               </h3>
-
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-semibold">₹{calculateSubtotal().toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">GST (18%)</span>
-                  <span className="font-semibold">₹{calculateTax(calculateSubtotal()).toFixed(0)}</span>
+                  <span className="text-gray-600">CGST (2.5%)</span>
+                  <span className="font-semibold">₹{calculateCGST(calculateSubtotal()).toFixed(0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">SGST (2.5%)</span>
+                  <span className="font-semibold">₹{calculateSGST(calculateSubtotal()).toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
@@ -345,4 +358,5 @@ export default function Cart() {
       </div>
     </div>
   );
+
 }
