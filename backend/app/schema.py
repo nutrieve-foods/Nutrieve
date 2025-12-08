@@ -63,6 +63,9 @@ class CartItem(CartItemBase):
     class Config:
         from_attributes = True
 
+class CartItemUpdate(BaseModel):
+    quantity: int
+
 # Address schemas
 class AddressBase(BaseModel):
     full_name: str

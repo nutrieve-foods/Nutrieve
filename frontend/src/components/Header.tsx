@@ -86,7 +86,7 @@ const Header = ({ user, setUser }: HeaderProps) => {
             <img
               src="/logo.jpg"
               alt="Nutrieve Logo"
-              className="w-24 h-24 object-contain"
+              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain"
             />
             <span
               className={`font-playfair font-bold text-xl ${
@@ -137,7 +137,7 @@ const Header = ({ user, setUser }: HeaderProps) => {
 
             {/* Auth Buttons */}
             {user ? (
-              <div className="hidden sm:flex items-center space-x-4">
+              <div className="hidden sm:flex items-center space-x-3">
                 <button
                   onClick={handleDashboardClick}
                   className={`px-4 py-2 rounded-full border ${
@@ -156,7 +156,7 @@ const Header = ({ user, setUser }: HeaderProps) => {
                 </button>
               </div>
             ) : (
-              <div className="hidden sm:flex items-center space-x-4">
+              <div className="hidden sm:flex items-center space-x-3">
                 <button
                   onClick={handleLoginClick}
                   className={`px-4 py-2 rounded-full border ${
@@ -202,7 +202,7 @@ const Header = ({ user, setUser }: HeaderProps) => {
               <button
                 key={item.name}
                 onClick={() => handleNavClick(item.hash)}
-                className="block w-full text-left py-2 font-medium transition-colors hover:text-orange-600 text-gray-700"
+                className="block w-full text-left py-3 text-base font-medium text-gray-700 hover:text-orange-600"
               >
                 {item.name}
               </button>

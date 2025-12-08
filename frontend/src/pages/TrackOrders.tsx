@@ -124,7 +124,7 @@ export default function TrackOrders() {
                       Order #{order.id.toString().padStart(6, '0')}
                     </h3>
                     <p className="text-gray-600">
-                      Placed on {new Date(order.created_at).toLocaleDateString()}
+                    Placed on {new Date(order.created_at).toLocaleDateString("en-GB")}
                     </p>
                     <p className="text-lg font-semibold text-gray-800 mt-2">
                       ₹{order.total_amount.toFixed(0)}
@@ -164,9 +164,7 @@ export default function TrackOrders() {
                           {step.label}
                         </p>
                         {stepIndex < getTrackingSteps(order.tracking_status || 'order_placed').length - 1 && (
-                          <div className={`absolute h-1 w-full mt-6 ${
-                            step.completed ? 'bg-green-500' : 'bg-gray-200'
-                          }`} style={{ left: '50%', width: 'calc(100% - 48px)' }} />
+                          <div className="hidden" />
                         )}
                       </div>
                     ))}
@@ -183,11 +181,17 @@ export default function TrackOrders() {
                     </div>
                   </div>
                   <button
-                    onClick={() => window.location.hash = 'contact'}
+                    onClick={() => {
+                      window.location.hash = '';
+                      setTimeout(() => {
+                        window.location.hash = 'contact';
+                      }, 50);
+                    }}
                     className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
                   >
                     Contact Us
                   </button>
+
                 </div>
               </motion.div>
             ))}

@@ -16,15 +16,85 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState('phonepe');
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartLoading, setCartLoading] = useState(true);
+
+  // ----- Helpers copied from cart page for accurate totals -----
+  const calculatePrice = (basePrice: number, size: string): number => {
+    const multipliers: Record<string, number> = {
+      '200gm': 1.0,
+      '500gm': 2.3,
+      '1kg': 4.2
+    };
+    return basePrice * (multipliers[size] || 1.0);
+  };
+
+  const calculateItemTotal = (item: any): number => {
+    const price = calculatePrice(item.product.base_price, item.size);
+    return price * item.quantity;
+  };
+
+  const calculateSubtotal = (): number => {
+    return cartItems.reduce((total, item) => total + calculateItemTotal(item), 0);
+  };
+
+  const calculateCGST = (subtotal: number): number => subtotal * 0.025;
+  const calculateSGST = (subtotal: number): number => subtotal * 0.025;
+
+  const calculateTotal = (): number => {
+    const subtotal = calculateSubtotal();
+    return subtotal + calculateCGST(subtotal) + calculateSGST(subtotal);
+  };
+  const displayTotal = cartItems.length > 0 ? calculateTotal() : (orderData.total || 0);
+
+  // ----- Load cart items so we can show price details -----
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const token = localStorage.getItem('nutrieve_token');
+        if (!token) {
+          setError('Please login to proceed with payment');
+          setCartLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/api/cart`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load cart');
+        }
+
+        const data = await response.json();
+        setCartItems(data || []);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load cart');
+      } finally {
+        setCartLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, []);
 
   const handlePayment = async () => {
     setLoading(true);
     setError(null);
   
     try {
+      if (!orderData.address?.id) {
+        throw new Error('Please select an address before payment');
+      }
+
+      if (cartItems.length === 0) {
+        throw new Error('Your cart is empty');
+      }
+
       const token = localStorage.getItem("nutrieve_token");
   
       // 1️⃣ Create order with full details for testing
+      const totalAmount = calculateTotal();
       const orderResponse = await fetch(
         `${(import.meta as any).env.VITE_API_URL}/api/orders/create`,
         {
@@ -35,12 +105,13 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
           },
           body: JSON.stringify({
             address_id: orderData.address.id,
-            items: orderData.items.map((item: any) => ({
+            items: cartItems.map((item: any) => ({
               product_id: item.product_id,
               size: item.size,
               quantity: item.quantity,
+              price: calculatePrice(item.product.base_price, item.size),
             })),
-            total_amount: orderData.total,
+            total_amount: totalAmount,
             payment_status: "completed", // ✅ Mark payment completed
           }),
         }
@@ -204,7 +275,7 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
               ) : (
                 <>
-                  <span>Pay ₹{orderData.total}</span>
+                  <span>Pay ₹{displayTotal.toFixed(0)}</span>
                   <CheckCircle className="w-5 h-5" />
                 </>
               )}
@@ -219,32 +290,53 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
           >
             <h3 className="font-playfair text-xl font-bold text-gray-800 mb-6">Order Summary</h3>
             
-            {/* Order Details */}
-            <div className="space-y-4 mb-6">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-semibold">₹{(orderData.total / 1.18).toFixed(0)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">GST (18%)</span>
-                <span className="font-semibold">₹{(orderData.total - (orderData.total / 1.18)).toFixed(0)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping</span>
-                <span className="font-semibold text-green-600">
-                  {orderData.total >= 500 ? 'Free' : '₹50'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Discount</span>
-                <span className="font-semibold text-green-600">₹0</span>
-              </div>
-              <hr className="my-4" />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total Amount</span>
-                <span>₹{orderData.total}</span>
-              </div>
-            </div>
+          {/* Order Details */}
+          <div className="space-y-4 mb-6">
+            {cartLoading ? (
+              <div className="text-gray-600 text-sm">Loading price details...</div>
+            ) : cartItems.length === 0 ? (
+              <div className="text-gray-600 text-sm">No items in cart.</div>
+            ) : (
+              (() => {
+                const subtotal = calculateSubtotal();
+                const cgst = calculateCGST(subtotal);
+                const sgst = calculateSGST(subtotal);
+                const total = calculateTotal();
+
+                return (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span className="font-semibold">₹{subtotal.toFixed(0)}</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">CGST (2.5%)</span>
+                      <span className="font-semibold">₹{cgst.toFixed(0)}</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">SGST (2.5%)</span>
+                      <span className="font-semibold">₹{sgst.toFixed(0)}</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Shipping</span>
+                      <span className="font-semibold text-green-600">Free</span>
+                    </div>
+
+                    <hr className="my-4" />
+
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total Amount</span>
+                      <span>₹{total.toFixed(0)}</span>
+                    </div>
+                  </>
+                );
+              })()
+            )}
+          </div>
+
 
             {/* Delivery Address */}
             <div className="border-t pt-6 mb-6">
