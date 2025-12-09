@@ -229,8 +229,8 @@ export default function Cart() {
                   >
                     {/* IMAGE LEFT */}
                     <div className="col-span-1 flex justify-center">
-                      <img
-                        src={item.product.image || '/background_image.jpg'}
+                      <img 
+                      src={item.product.image ? `${import.meta.env.VITE_API_URL}/${item.product.image}` : '/background_image.jpg'}
                         alt={item.product.name}
                         className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg"
                       />
