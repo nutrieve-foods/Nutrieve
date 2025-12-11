@@ -37,7 +37,8 @@ export default function Cart() {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/cart`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -65,7 +66,8 @@ export default function Cart() {
     setUpdating(itemId);
     try {
       const token = localStorage.getItem('nutrieve_token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cart/${itemId}`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/cart/${itemId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +97,8 @@ export default function Cart() {
     setUpdating(itemId);
     try {
       const token = localStorage.getItem('nutrieve_token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cart/${itemId}`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/cart/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
