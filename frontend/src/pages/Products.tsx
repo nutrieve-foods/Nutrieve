@@ -5,7 +5,7 @@ import { Search, ListFilter as Filter, Eye } from 'lucide-react';
 type Product = { 
   id: number; 
   name: string; 
-  price: number; 
+  base_price: number; 
   image?: string | null; 
   description?: string 
 };
@@ -23,6 +23,7 @@ export default function Products({ onProductSelect }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState<number | null>(null);
 
+
   useEffect(() => {
     loadProducts();
   }, []);
@@ -38,6 +39,7 @@ export default function Products({ onProductSelect }: Props) {
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       
       const data = await response.json();
+      console.log("PRODUCTS FROM API:", data); 
       setItems(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load products');
@@ -100,13 +102,13 @@ export default function Products({ onProductSelect }: Props) {
     )
     .sort((a, b) => {
       switch (sortBy) {
-        case 'price-low': return a.price - b.price;
-        case 'price-high': return b.price - a.price;
+        case 'price-low': return a.base_price - b.base_price;
+        case 'price-high': return b.base_price - a.base_price;
         default: return a.name.localeCompare(b.name);
       }
     });
 
-  const total = items.reduce((sum, p) => sum + (cart[p.id] || 0) * p.price, 0);
+  const total = items.reduce((sum, p) => sum + (cart[p.id] || 0) * p.base_price, 0);
   const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
 
   if (loading) {
@@ -215,7 +217,7 @@ export default function Products({ onProductSelect }: Props) {
               {/* Image */}
               <div className="relative overflow-hidden">
                 <img
-                  src={p.image || '/background_image.jpg'}
+                  src={`/${p.image}`}
                   alt={p.name}
                   className="w-full h-40 sm:h-48 object-cover group-hover:scale-110 transition"
                 />
@@ -243,7 +245,7 @@ export default function Products({ onProductSelect }: Props) {
                   
                   {/* PRICE */}
                   <div>
-                    <div className="text-lg font-bold text-gray-800">₹{p.price}</div>
+                    <div className="text-lg font-bold text-gray-800">₹{p.base_price.toFixed(0)}</div>
                     <div className="text-[11px] text-gray-500">1000g pack</div>
                   </div>
 

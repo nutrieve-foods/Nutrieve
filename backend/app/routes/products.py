@@ -7,11 +7,11 @@ from ..models import Product
 router = APIRouter(prefix="/api/products", tags=["products"])
 
 
-@router.get("")
+@router.get("/")
 def list_products(db: Session = Depends(get_db)):
-    """Get all active products from the database."""
+    """Get all active products."""
     try:
-        return db.query(Product).filter(Product.is_active == True).all()  # noqa: E712
+        return db.query(Product).filter(Product.is_active == True).all()
     except Exception as e:
         print(f"Error in list_products: {e}")
         raise
@@ -28,4 +28,3 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error in get_product: {e}")
         raise
-
