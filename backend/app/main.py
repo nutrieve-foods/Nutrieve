@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.routes import auth, cart, products, orders
 from app.database import Base, engine
+from app.routes import admin_seed
 
 # Create tables
 try:
@@ -29,6 +30,7 @@ app.include_router(auth.router)
 app.include_router(cart.router)
 app.include_router(products.router)
 app.include_router(orders.router)
+app.include_router(admin_seed.router)
 
 
 @app.get("/")
