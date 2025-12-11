@@ -146,7 +146,7 @@ export default function Products({ onProductSelect }: Props) {
             Our Premium Collection
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Authentic organic spice powders made with purity & tradition.
+            Authentic spice powders made with purity & tradition.
           </p>
         </motion.div>
 
