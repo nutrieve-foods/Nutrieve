@@ -6,7 +6,7 @@ type Product = {
   id: number;
   name: string;
   description: string;
-  price: number;
+  base_price: number;
   image?: string;
   category?: string;
 };
@@ -24,8 +24,20 @@ export default function ProductDetail({ productId, onBack }: Props) {
   const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
+  useEffect(() => {
     loadProduct();
+    loadCartQuantity();
   }, [productId]);
+
+  useEffect(() => {
+    const handler = () => loadCartQuantity();
+    window.addEventListener("hashchange", handler);
+    return () => window.removeEventListener("hashchange", handler);
+  }, []);
+  
 
   const loadProduct = async () => {
     setLoading(true);
@@ -42,6 +54,29 @@ export default function ProductDetail({ productId, onBack }: Props) {
     }
   };
 
+  const loadCartQuantity = async () => {
+    const token = localStorage.getItem("nutrieve_token");
+    if (!token) return;
+  
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+    const res = await fetch(apiUrl + "/api/cart", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  
+    const data = await res.json();
+    console.log("DETAIL CART:", data);
+  
+    const item = data.find(
+      (i: any) => i.product_id === parseInt(productId)
+    );
+  
+    if (item) {
+      setQuantity(item.quantity);
+    }
+  };
+  
+  
   const calculatePrice = (base: number, size: string) => {
     const multiplier: any = { "200gm": 0.2, "500gm": 0.5, "1kg": 1.0 };
     return base * (multiplier[size] || 1);
@@ -83,7 +118,7 @@ export default function ProductDetail({ productId, onBack }: Props) {
 
   const buyNow = async () => {
     await addToCart();
-    if (!addingToCart) window.location.hash = "/cart";
+    if (!addingToCart) window.location.hash = "cart";
   };
 
   if (loading) {
@@ -140,7 +175,7 @@ export default function ProductDetail({ productId, onBack }: Props) {
             >
               {/* FULL WIDTH MOBILE IMAGE */}
               <img
-                src={product.image || "/background_image.jpg"}
+                src={`/${product.image}`} 
                 alt={product.name}
                 className="
                   rounded-xl 
@@ -191,7 +226,7 @@ export default function ProductDetail({ productId, onBack }: Props) {
                     `}
                   >
                     <div className="font-semibold">{s}</div>
-                    <div className="text-gray-600 text-sm">₹{calculatePrice(product.price, s)}</div>
+                    <div className="text-gray-600 text-sm">₹{calculatePrice(product.base_price, s)}</div>
                   </button>
                 ))}
               </div>
@@ -223,10 +258,10 @@ export default function ProductDetail({ productId, onBack }: Props) {
             {/* PRICE */}
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
               <div className="text-3xl font-bold">
-                ₹{(calculatePrice(product.price, selectedSize) * quantity).toFixed(0)}
+                ₹{(calculatePrice(product.base_price, selectedSize) * quantity).toFixed(0)}
               </div>
               <div className="text-gray-600 text-sm">
-                ₹{calculatePrice(product.price, selectedSize)} per {selectedSize}
+                ₹{calculatePrice(product.base_price, selectedSize)} per {selectedSize}
               </div>
             </div>
 

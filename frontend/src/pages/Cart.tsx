@@ -23,6 +23,10 @@ export default function Cart() {
   const [updating, setUpdating] = useState<number | null>(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     loadCart();
   }, []);
 
@@ -120,9 +124,9 @@ export default function Cart() {
 
   const calculatePrice = (basePrice: number, size: string): number => {
     const multipliers: Record<string, number> = {
-      '200gm': 1.0,
-      '500gm': 2.3,
-      '1kg': 4.2
+      '200gm': 0.2,
+      '500gm': 0.5,
+      '1kg': 1.0
     };
     return basePrice * (multipliers[size] || 1.0);
   };
@@ -233,7 +237,7 @@ export default function Cart() {
                     {/* IMAGE LEFT */}
                     <div className="col-span-1 flex justify-center">
                       <img 
-                      src={item.product.image ? `${import.meta.env.VITE_API_URL}/${item.product.image}` : '/background_image.jpg'}
+                      src={`/${item.product.image}`}
                         alt={item.product.name}
                         className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg"
                       />

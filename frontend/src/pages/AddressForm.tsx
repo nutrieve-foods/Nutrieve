@@ -34,12 +34,17 @@ export default function AddressForm({ onBack, onNext }: Props) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [isPincodeValid, setIsPincodeValid] = useState(false);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
+if (address.pincode !== "441904") {
+  setLoading(false);
+  setError("Sorry, we are not yet serviceable at this pincode.");
+  return;
+}
     try {
       // Save address to backend
       const token = localStorage.getItem('nutrieve_token');
@@ -83,6 +88,15 @@ export default function AddressForm({ onBack, onNext }: Props) {
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
+    if (name === "pincode") {
+      if (value === "441904") {
+        setIsPincodeValid(true);
+        setError(null);
+      } else {
+        setIsPincodeValid(false);
+        setError("Sorry, we are not yet serviceable at this pincode.");
+      }
+    }
   };
 
   const indianStates = [
@@ -286,7 +300,7 @@ export default function AddressForm({ onBack, onNext }: Props) {
             {/* Submit Button */}
             <motion.button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isPincodeValid}
               className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
