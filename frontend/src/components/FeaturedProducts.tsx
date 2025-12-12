@@ -1,42 +1,89 @@
 import { motion } from "framer-motion";
 import { Leaf, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+
+
+
 
 const FeaturedProducts = () => {
-  const products = [
-    {
-      id: 1,
-      name: "Onion Powder",
-      price: "₹230",
-      originalPrice: "₹399",
-      image: "/Onion_Powder.jpg",
-      description: "Intense savory depth",
-    },
-    {
-      id: 2,
-      name: "Tomato Powder",
-      price: "₹185",
-      originalPrice: "₹329",
-      image: "/Tomato_Powder.jpg",
-      description: "Tangy zest for sauces and soups",
-    },
-    {
-      id: 3,
-      name: "Garlic Powder",
-      price: "₹375",
-      originalPrice: "₹359",
-      image: "/Garlic_Powder.jpg",
-      description: "Bold aroma for instant flavor",
-    },
-    {
-      id: 4,
-      name: "Lemon Powder",
-      price: "₹180",
-      originalPrice: "₹299",
-      image: "/Lemon_Powder.jpg",
-      description: "Citrusy brightness in a dash",
-    },
-  ];
+  const [cart, setCart] = useState<Record<number, number>>({});
+  const [products, setProducts] = useState<any[]>([]);
 
+useEffect(() => {
+  loadCart();
+  loadFeaturedProducts();
+}, []);
+
+const loadFeaturedProducts = async () => {
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const res = await fetch(`${apiUrl}/api/products`);
+  const data = await res.json();
+
+  // Pick 4 random products or your chosen 4
+  setProducts(data.slice(0, 4));
+};
+
+
+  const loadCart = async () => {
+    const token = localStorage.getItem("nutrieve_token");
+    if (!token) return;
+  
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+    const res = await fetch(apiUrl + "/api/cart", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  
+    const data = await res.json();
+  
+    const cartMap: Record<number, number> = {};
+    data.forEach((item: any) => {
+      cartMap[item.product_id] = item.quantity;
+    });
+  
+    setCart(cartMap);
+  };
+  
+  useEffect(() => {
+    loadCart();
+  }, []);
+  
+  const addToCart = async (productId: number) => {
+    const token = localStorage.getItem("nutrieve_token");
+    if (!token) {
+      window.location.hash = "login";
+      return;
+    }
+  
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+    await fetch(`${apiUrl}/api/cart/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        product_id: productId,
+        quantity: 1,
+        size: "200gm"
+      })
+    });
+  
+    setCart(c => ({ ...c, [productId]: (c[productId] || 0) + 1 }));
+  };
+  
+  const removeFromLocalCart = (productId: number) => {
+    setCart(c => {
+      const next = { ...c };
+      const qty = (c[productId] || 0) - 1;
+      if (qty <= 0) delete next[productId];
+      else next[productId] = qty;
+  
+      return next;
+    });
+  };
+  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -140,25 +187,56 @@ const FeaturedProducts = () => {
                 {/* Price */}
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xl md:text-2xl font-bold text-gray-900">
-                    {product.price}
+                    {product.base_price.toFixed(0)}
                   </span>
                 </div>
 
                 {/* Add to Cart */}
-                <motion.button
-                  className="
-                    w-full bg-gradient-to-r from-orange-500 to-red-500 
-                    text-white py-2.5 md:py-3 rounded-lg md:rounded-xl 
-                    font-semibold 
-                    hover:from-orange-600 hover:to-red-600 
-                    transition-all duration-300 
-                    shadow-md hover:shadow-lg
-                  "
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  Add to Cart
-                </motion.button>
+                {/* If item is in cart → show quantity controls */}
+{cart[product.id] ? (
+  <div className="flex items-center justify-between mt-2">
+    <button
+      className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center"
+      onClick={() => removeFromLocalCart(product.id)}
+    >
+      -
+    </button>
+
+    <span className="font-semibold text-lg">{cart[product.id]}</span>
+
+    <button
+      className="w-9 h-9 rounded-full bg-orange-500 text-white flex items-center justify-center"
+      onClick={() => addToCart(product.id)}
+    >
+      +
+    </button>
+        </div>
+      ) : (
+        <motion.button
+          onClick={() => addToCart(product.id)}
+          className="
+            w-full bg-gradient-to-r from-orange-500 to-red-500 
+            text-white py-2.5 md:py-3 rounded-lg md:rounded-xl 
+            font-semibold hover:from-orange-600 hover:to-red-600 
+            shadow-md hover:shadow-lg transition-all duration-300
+          "
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+        > 
+          Add to Cart
+        </motion.button>
+      )}
+
+      {/* View Details Button */}
+      {cart[product.id] && (
+        <button
+          onClick={() => (window.location.hash = `product/${product.id}`)}
+          className="w-full mt-3 bg-white border text-orange-600 px-4 py-2 rounded-xl font-semibold hover:bg-orange-50 transition"
+        >
+          View Details
+        </button>
+      )}
+
               </div>
             </motion.div>
           ))}

@@ -23,11 +23,21 @@ export default function Products({ onProductSelect }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState<number | null>(null);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     loadProducts();
+    loadCart();
   }, []);
 
+  useEffect(() => {
+    const handler = () => loadCart();
+    window.addEventListener("hashchange", handler);
+    return () => window.removeEventListener("hashchange", handler);
+  }, []);
+  
   const loadProducts = async () => {
     try {
       setLoading(true);
@@ -48,6 +58,30 @@ export default function Products({ onProductSelect }: Props) {
     }
   };
 
+  const loadCart = async () => {
+    const token = localStorage.getItem("nutrieve_token");
+    if (!token) return;
+  
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+    const res = await fetch(apiUrl + "/api/cart", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  
+    const data = await res.json();
+  
+    console.log("CART RESPONSE:", data);
+  
+    // data is an array
+    const cartMap: Record<number, number> = {};
+    data.forEach((item: any) => {
+      cartMap[item.product_id] = item.quantity;
+    });
+  
+    setCart(cartMap);
+  };
+  
+  
   const addToCart = async (productId: number) => {
     const token = localStorage.getItem('nutrieve_token');
     if (!token) {
@@ -67,7 +101,7 @@ export default function Products({ onProductSelect }: Props) {
         body: JSON.stringify({
           product_id: productId,
           quantity: 1,
-          size: '200gm'
+          size: '1kg'
         })
       });
 
@@ -139,7 +173,7 @@ export default function Products({ onProductSelect }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-24 pb-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
@@ -194,14 +228,15 @@ export default function Products({ onProductSelect }: Props) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
           className="
-            grid 
-            grid-cols-2 
-            sm:grid-cols-3 
-            md:grid-cols-3 
-            lg:grid-cols-4 
-            gap-4 sm:gap-6 lg:gap-8 
-            mb-8
-          "
+                    grid 
+                    grid-cols-2 
+                    sm:grid-cols-3 
+                    md:grid-cols-3 
+                    lg:grid-cols-4 
+                    gap-3 sm:gap-5 lg:gap-5
+                    auto-rows-fr
+                    mb-8
+                  "
         >
 
           {filteredItems.map((p, index) => (
@@ -210,16 +245,16 @@ export default function Products({ onProductSelect }: Props) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06 }}
-              className="group bg-white rounded-xl shadow-sm hover:shadow-xl overflow-hidden border border-gray-200 transition-all"
+              className="group bg-white rounded-xl shadow-sm hover:shadow-xl overflow-hidden border border-gray-200 transition-all flex flex-col h-[430px] sm:h-[450px]"
               whileHover={{ y: -4 }}
             >
               
               {/* Image */}
               <div className="relative overflow-hidden">
                 <img
-                  src={`/${p.image}`}
+                  src={`/${p.image}`} 
                   alt={p.name}
-                  className="w-full h-40 sm:h-48 object-cover group-hover:scale-110 transition"
+                  className="w-full h-[160px] sm:h-[180px] object-cover rounded-t-xl"
                 />
 
                 <button
@@ -231,8 +266,8 @@ export default function Products({ onProductSelect }: Props) {
               </div>
 
               {/* CONTENT */}
-              <div className="p-4 space-y-3">
-                <h3 className="font-playfair text-lg font-semibold text-gray-800">
+              <div className="p-4 flex flex-col gap-3 flex-grow">
+              <h3 className="font-playfair text-lg font-semibold text-gray-800">
                   {p.name}
                 </h3>
 
@@ -241,7 +276,7 @@ export default function Products({ onProductSelect }: Props) {
                 </p>
 
                 {/* FIXED ALIGNMENT PRICE + QUANTITY */}
-                <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center justify-between mt-auto">
                   
                   {/* PRICE */}
                   <div>
@@ -271,12 +306,15 @@ export default function Products({ onProductSelect }: Props) {
                     </button>
 
                   </div>
-                </div>
+                 </div>
+
+
 
                 {/* View Button */}
                 <button
-                  onClick={() => onProductSelect?.(p.id.toString())}
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-2 rounded-xl font-semibold hover:opacity-90"
+                 onClick={() => onProductSelect?.(p.id.toString())}
+                  className="w-full mt-4 bg-gradient-to-r from-orange-500 to-red-600 
+  text-white py-2 rounded-xl font-semibold hover:opacity-90"
                 >
                   View Details
                 </button>
@@ -299,9 +337,13 @@ export default function Products({ onProductSelect }: Props) {
                 <div className="font-semibold">{totalItems} items in cart</div>
                 <div className="text-sm text-gray-600">Total: ₹{total}</div>
               </div>
-              <button className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-xl font-semibold">
+              <button
+                onClick={() => (window.location.hash = "cart")}
+                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-xl font-semibold"
+              >
                 Checkout
               </button>
+
             </div>
           </motion.div>
         )}
