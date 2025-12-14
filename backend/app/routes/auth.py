@@ -10,6 +10,8 @@ from ..schema import UserCreate, UserLogin, User as UserSchema
 from fastapi import Body
 import random
 from app.utils.email_service import send_email
+
+import os
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 # Security
@@ -17,7 +19,7 @@ security = HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT settings
-SECRET_KEY = "nutrieve-super-secret-jwt-key-2024"  # In production, use environment variable
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-do-not-use-in-prod")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 
