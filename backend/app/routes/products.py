@@ -6,7 +6,7 @@ from ..models import Product
 
 router = APIRouter(prefix="/api/products", tags=["products"])
 
-
+@router.get("")
 @router.get("/")
 def list_products(db: Session = Depends(get_db)):
     """Get all active products."""

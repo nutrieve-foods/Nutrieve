@@ -20,9 +20,15 @@ export default function Login({ onSignedIn }: Props) {
       });
       
       if (!r.ok) {
-        const errorData = await r.text();
-        throw new Error(errorData || 'Login failed');
+        const errorJson = await r.json().catch(() => null);
+        const message =
+          errorJson?.detail?.toLowerCase().includes("incorrect")
+            ? "Invalid email or password."
+            : "Unable to sign in. Please try again.";
+      
+        throw new Error(message);
       }
+      
       
       const data = await r.json();
       localStorage.setItem('nutrieve_user', JSON.stringify(data.user));
@@ -79,10 +85,12 @@ export default function Login({ onSignedIn }: Props) {
               </div>
             </div>
             <div className="text-right">
-              <button
+            <button
+                type="button"
                 onClick={() => (window.location.hash = "forgot-password")}
                 className="text-sm text-orange-600 hover:text-orange-700"
               >
+
                 Forgot Password?
               </button>
             </div>
