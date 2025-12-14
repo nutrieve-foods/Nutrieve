@@ -7,6 +7,10 @@ from ..models import Product
 router = APIRouter(prefix="/api/products", tags=["products"])
 
 @router.get("")
+def list_products_no_slash(db: Session = Depends(get_db)):
+    return db.query(Product).filter(Product.is_active == True).all()
+
+
 @router.get("/")
 def list_products(db: Session = Depends(get_db)):
     """Get all active products."""
