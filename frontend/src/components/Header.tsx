@@ -13,10 +13,18 @@ const Header = ({ user, setUser }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { cartCount } = useCart();
 
+  // Scroll detection
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Auto-close mobile menu on route change
+  useEffect(() => {
+    const closeMenu = () => setIsMobileMenuOpen(false);
+    window.addEventListener("hashchange", closeMenu);
+    return () => window.removeEventListener("hashchange", closeMenu);
   }, []);
 
   const navItems = [
@@ -27,41 +35,38 @@ const Header = ({ user, setUser }: HeaderProps) => {
     { name: 'Contact', hash: 'contact' }
   ];
 
-  const handleNavClick = (hash: string) => {
-    console.log('Nav clicked:', hash); // Debug log
-    if (hash === '') {
-      window.location.hash = '';
-    } else {
-      window.location.hash = hash;
+  const navigate = (hash: string) => {
+    const sectionIds = ["about", "benefits", "contact"];
+  
+    // If navigating to homepage sections
+    if (sectionIds.includes(hash)) {
+      // Step 1: go to homepage
+      window.location.hash = "";
+  
+      // Step 2: smooth scroll after page renders
+      setTimeout(() => {
+        const el = document.getElementById(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 150);
+  
+      setIsMobileMenuOpen(false);
+      return;
     }
+  
+    // Normal page navigation
+    window.location.hash = hash;
+    window.scrollTo(0, 0);
     setIsMobileMenuOpen(false);
   };
+  
 
   const handleLogout = () => {
     localStorage.removeItem('nutrieve_user');
     localStorage.removeItem('nutrieve_token');
     setUser(null);
-    window.location.hash = '';
-  };
-
-  const handleCartClick = () => {
-    console.log('Cart clicked'); // Debug log
-    window.location.hash = 'cart';
-  };
-
-  const handleLoginClick = () => {
-    console.log('Login clicked'); // Debug log
-    window.location.hash = 'login';
-  };
-
-  const handleSignupClick = () => {
-    console.log('Signup clicked'); // Debug log
-    window.location.hash = 'signup';
-  };
-
-  const handleDashboardClick = () => {
-    console.log('Dashboard clicked'); // Debug log
-    window.location.hash = 'dashboard';
+    navigate("");
   };
 
   return (
@@ -77,11 +82,12 @@ const Header = ({ user, setUser }: HeaderProps) => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+
+          {/* LOGO */}
           <motion.div
             className="flex items-center space-x-2 cursor-pointer"
             whileHover={{ scale: 1.05 }}
-            onClick={() => handleNavClick('')}
+            onClick={() => navigate('')}
           >
             <img
               src="/logo.jpg"
@@ -97,54 +103,50 @@ const Header = ({ user, setUser }: HeaderProps) => {
             </span>
           </motion.div>
 
-          {/* Desktop Navigation */}
+          {/* DESKTOP NAV */}
           <nav className="hidden md:flex space-x-8">
             {navItems.map((item) => (
               <motion.button
                 key={item.name}
-                onClick={() => handleNavClick(item.hash)}
+                onClick={() => navigate(item.hash)}
                 className={`font-medium transition-colors hover:text-orange-600 ${
                   isScrolled ? 'text-gray-700' : 'text-gray-800'
                 }`}
                 whileHover={{ y: -2 }}
-                transition={{ duration: 0.2 }}
               >
                 {item.name}
               </motion.button>
             ))}
           </nav>
 
-          {/* Cart, Auth & Mobile Menu */}
-          <div className="flex items-center space-x-4 relative">
-            {/* Cart Icon with Count */}
+          {/* CART + AUTH + MENU BUTTON */}
+          <div className="flex items-center space-x-4">
+
+            {/* CART */}
             <motion.button
-              onClick={handleCartClick}
+              onClick={() => navigate('cart')}
               className={`p-2 rounded-full relative transition-colors ${
-                isScrolled
-                  ? 'text-gray-700 hover:bg-gray-100'
-                  : 'text-gray-800 hover:bg-white/20'
+                isScrolled ? 'text-gray-700 hover:bg-gray-100'
+                           : 'text-gray-800 hover:bg-white/20'
               }`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
               <ShoppingCart className="w-6 h-6" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs
+                 font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {cartCount}
                 </span>
               )}
             </motion.button>
 
-            {/* Auth Buttons */}
+            {/* AUTH BUTTONS */}
             {user ? (
               <div className="hidden sm:flex items-center space-x-3">
                 <button
-                  onClick={handleDashboardClick}
-                  className={`px-4 py-2 rounded-full border ${
-                    isScrolled
-                      ? 'border-orange-400 text-orange-600 hover:bg-orange-50'
-                      : 'border-orange-400 text-orange-600 hover:bg-orange-50'
-                  }`}
+                  onClick={() => navigate('dashboard')}
+                  className="px-4 py-2 rounded-full border border-orange-400 text-orange-600 hover:bg-orange-50"
                 >
                   Dashboard
                 </button>
@@ -158,17 +160,13 @@ const Header = ({ user, setUser }: HeaderProps) => {
             ) : (
               <div className="hidden sm:flex items-center space-x-3">
                 <button
-                  onClick={handleLoginClick}
-                  className={`px-4 py-2 rounded-full border ${
-                    isScrolled
-                      ? 'border-orange-400 text-orange-600 hover:bg-orange-50'
-                      : 'border-orange-400 text-orange-600 hover:bg-orange-50'
-                  }`}
+                  onClick={() => navigate('login')}
+                  className="px-4 py-2 rounded-full border border-orange-400 text-orange-600 hover:bg-orange-50"
                 >
                   Login
                 </button>
                 <button
-                  onClick={handleSignupClick}
+                  onClick={() => navigate('signup')}
                   className="px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white hover:opacity-90"
                 >
                   Sign up
@@ -176,42 +174,41 @@ const Header = ({ user, setUser }: HeaderProps) => {
               </div>
             )}
 
-            {/* Mobile menu toggle */}
+            {/* MOBILE MENU TOGGLE */}
             <button
               className={`md:hidden p-2 rounded-full transition-colors ${
-                isScrolled
-                  ? 'text-gray-700 hover:bg-gray-100'
-                  : 'text-gray-800 hover:bg-white/20'
+                isScrolled ? 'text-gray-700 hover:bg-gray-100'
+                           : 'text-gray-800 hover:bg-white/20'
               }`}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* MOBILE NAV */}
         {isMobileMenuOpen && (
           <motion.nav
             className="md:hidden py-4 border-t border-orange-200 bg-white"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
           >
             {navItems.map((item) => (
               <button
                 key={item.name}
-                onClick={() => handleNavClick(item.hash)}
+                onClick={() => navigate(item.hash)}
                 className="block w-full text-left py-3 text-base font-medium text-gray-700 hover:text-orange-600"
               >
                 {item.name}
               </button>
             ))}
-            
+
             {user ? (
               <>
                 <button
-                  onClick={handleDashboardClick}
+                  onClick={() => navigate('dashboard')}
                   className="block w-full text-left py-2 font-medium text-gray-700 hover:text-orange-600"
                 >
                   Dashboard
@@ -226,13 +223,13 @@ const Header = ({ user, setUser }: HeaderProps) => {
             ) : (
               <>
                 <button
-                  onClick={handleLoginClick}
+                  onClick={() => navigate('login')}
                   className="block w-full text-left py-2 font-medium text-gray-700 hover:text-orange-600"
                 >
                   Login
                 </button>
                 <button
-                  onClick={handleSignupClick}
+                  onClick={() => navigate('signup')}
                   className="block w-full text-left py-2 font-medium text-gray-700 hover:text-orange-600"
                 >
                   Sign up

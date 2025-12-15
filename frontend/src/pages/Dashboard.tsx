@@ -105,26 +105,28 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 pt-24 pb-10 px-3">
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-lg p-8 mb-8"
+          className="bg-white rounded-2xl shadow-lg p-6 mb-6"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
-                <User className="w-8 h-8 text-white" />
+          <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                <User className="w-10 h-10 text-white" />
               </div>
-              <div>
-                <h1 className="font-playfair text-3xl font-bold text-gray-800">
-                  Welcome back, {user.name}!
-                </h1>
-                <p className="text-gray-600">{user.email}</p>
-              </div>
+
+              <h1 className="font-playfair text-2xl font-bold text-gray-800">
+                Welcome back, {user.name}!
+              </h1>
+
+              <p className="text-gray-600 text-sm">{user.email}</p>
             </div>
+
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors"
@@ -140,9 +142,9 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-lg p-2 mb-8"
+          className="bg-white rounded-2xl shadow-lg p-6 mb-6"
         >
-          <div className="flex space-x-2">
+          <div className="flex justify-center space-x-2">
             <button
               onClick={() => setActiveTab('orders')}
               className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-xl font-semibold transition-all ${
@@ -185,7 +187,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl shadow-lg p-8"
+            className="bg-white rounded-2xl shadow-lg p-6 mb-6"
           >
             <h2 className="font-playfair text-2xl font-bold text-gray-800 mb-6">Order History</h2>
             
@@ -209,7 +211,9 @@ export default function Dashboard() {
               <div className="space-y-6">
                 {orders.map((order) => (
                   <div key={order.id} className="border border-gray-200 rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-4">
+                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+
+
                       <div>
                         <h3 className="font-semibold text-lg text-gray-800">
                           Order #{order.id.toString().padStart(6, '0')}
@@ -232,7 +236,7 @@ export default function Dashboard() {
                     {/* Order Items */}
                     <div className="space-y-3">
                       {order.order_items?.map((item) => (
-                        <div key={item.id} className="flex items-center space-x-4 bg-gray-50 p-3 rounded-lg">
+                        <div key={item.id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg flex-wrap">
                           <img
                             src={item.product.image || '/background_image.jpg'}
                             alt={item.product.name}
@@ -262,7 +266,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl shadow-lg p-8"
+            className="bg-white rounded-2xl shadow-lg p-6 mb-6"
           >
             <h2 className="font-playfair text-2xl font-bold text-gray-800 mb-6">Profile Information</h2>
             
@@ -298,7 +302,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl shadow-lg p-8"
+            className="bg-white rounded-2xl shadow-lg p-6 mb-6"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-playfair text-2xl font-bold text-gray-800">Edit Profile</h2>
@@ -361,7 +365,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6"
         >
           <button
             onClick={() => window.location.hash = 'products'}
