@@ -62,7 +62,7 @@ export default function Footer() {
                 </h3>
 
                 <p className="text-gray-300 mb-6 leading-relaxed">
-                  Premium spice powders crafted with three generations of expertise. 
+                  Premium powders crafted with three generations of expertise. 
                   Bringing authentic Indian flavors to your kitchen with uncompromising quality.
                 </p>
 

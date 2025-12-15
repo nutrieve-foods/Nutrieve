@@ -50,6 +50,7 @@ function App() {
 
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
+      window.scrollTo(0, 0);
       console.log('Hash changed to:', hash); // Debug log
       
       if (hash.startsWith('product/')) {
@@ -187,7 +188,7 @@ function App() {
 
   return (
     <CartProvider>
-      <div className="min-h-screen">
+     <div className="min-h-screen overflow-x-hidden">
         <Header user={user} setUser={setUser} />
         <main>{renderPage()}</main>
         { <Footer />}

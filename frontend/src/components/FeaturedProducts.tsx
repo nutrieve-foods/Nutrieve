@@ -252,11 +252,9 @@ const loadFeaturedProducts = async () => {
         >
           <motion.button
             className="
-              group inline-flex items-center space-x-2 
-              bg-transparent border-2 border-white 
-              text-white px-8 py-3 rounded-full font-semibold 
-              hover:bg-orange-500 hover:text-white 
-              transition-all duration-300
+              group inline-flex items-center space-x-2 bg-transparent border-2 border-white 
+  text-white px-6 py-3 rounded-full font-semibold hover:bg-orange-500 hover:text-white 
+  transition-all duration-300 max-w-full
             "
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}

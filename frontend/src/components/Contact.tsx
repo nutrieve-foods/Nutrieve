@@ -28,7 +28,7 @@ const Contact = () => {
     {
       icon: Phone,
       title: 'Call Us',
-      details: '+91 9834489361, +91 7219206711',
+      details: '+91 7219206711',
       subtext: 'Mon-Sat 9AM-6PM IST'
     },
     {
