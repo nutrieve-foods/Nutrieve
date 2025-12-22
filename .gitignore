@@ -5,5 +5,20 @@ frontend/dist/
 .env
 backend/__pycache__/
 backend/.venv/
+# Environment variables
+.env
+*.env
+
+# Backend env
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+
 
 
