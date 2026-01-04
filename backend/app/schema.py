@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date
 import enum
@@ -9,8 +9,19 @@ class UserBase(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
 
+
+
+
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(
+    ...,
+    min_length=8,
+    max_length=16,
+    pattern=r'^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};:"\\|,.<>/?]*$'
+)
+
+
+   
 
 class UserLogin(BaseModel):
     email: EmailStr

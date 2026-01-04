@@ -25,8 +25,14 @@ export default function Signup({ onSignedUp }: Props) {
       });
       
       if (!r.ok) {
-        const errorData = await r.text();
-        throw new Error(errorData || 'Signup failed');
+        const errorJson = await r.json().catch(() => null);
+
+        if (errorJson?.detail === "Email already registered") {
+          throw new Error("This email is already registered. Please log in or use a different email.");
+        }
+
+        throw new Error("Unable to create account. Please try again.");
+
       }
       
       const data = await r.json();

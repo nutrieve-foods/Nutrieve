@@ -8,9 +8,14 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
 
   const handleSendOtp = async () => {
+    if (!email) {
+      setMessage("Please enter your registered email address.");
+      return;
+    }
+  
     setLoading(true);
     setMessage("");
-
+  
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
       const r = await fetch(`${apiUrl}/api/auth/forgot-password`, {
@@ -18,17 +23,32 @@ export default function ForgotPassword() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-
-      if (!r.ok) throw new Error("Failed to send OTP");
-
-      setMessage("OTP has been sent to your email.");
-      window.location.hash = "reset-password";
-    } catch (e) {
-      setMessage("Email not found or error occurred.");
+  
+      const data = await r.json();
+  
+      if (!r.ok) {
+        throw new Error(data.detail || "Unable to send reset code");
+      }
+  
+      setMessage(
+        "A verification code has been sent to your email. Please check your inbox."
+      );
+  
+      // Small delay for UX, then navigate
+      setTimeout(() => {
+        window.location.hash = "reset-password";
+      }, 1200);
+  
+    } catch (e: any) {
+      setMessage(
+        e.message ||
+          "We couldn't find an account with this email. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">

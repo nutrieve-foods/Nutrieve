@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ListFilter as Filter, Eye } from 'lucide-react';
 
+
+
 type Product = { 
   id: number; 
   name: string; 
   base_price: number; 
+  category: string;          // 👈 ADD THIS
   image?: string | null; 
   description?: string 
 };
@@ -16,13 +19,16 @@ type Props = {
 
 export default function Products({ onProductSelect }: Props) {
   const [items, setItems] = useState<Product[]>([]);
-  const [cart, setCart] = useState<Record<number, number>>({});
+  const [cart, setCart] = useState<
+  Record<number, { quantity: number; cartItemId: number }>
+>({});
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState<number | null>(null);
-
+  const [category, setCategory] = useState<string | null>(null);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -32,6 +38,19 @@ export default function Products({ onProductSelect }: Props) {
     loadCart();
   }, []);
 
+  // Live-update category on hash change
+  useEffect(() => {
+    const updateCategoryFromHash = () => {
+      const hash = window.location.hash;
+      const params = new URLSearchParams(hash.split("?")[1]);
+      const cat = params.get("category");
+      setCategory(cat);
+    };
+    updateCategoryFromHash();
+    window.addEventListener("hashchange", updateCategoryFromHash);
+    return () => window.removeEventListener("hashchange", updateCategoryFromHash);
+  }, []);
+    
   useEffect(() => {
     const handler = () => loadCart();
     window.addEventListener("hashchange", handler);
@@ -60,26 +79,40 @@ export default function Products({ onProductSelect }: Props) {
 
   const loadCart = async () => {
     const token = localStorage.getItem("nutrieve_token");
-    if (!token) return;
+  
+    // If user not logged in → always set empty cart ONCE and return
+    if (!token) {
+      setCart({});
+      return;
+    }
   
     const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
   
-    const res = await fetch(apiUrl + "/api/cart", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      const res = await fetch(apiUrl + "/api/cart", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
   
-    const data = await res.json();
+      if (!res.ok) {
+        setCart({});
+        return;
+      }
   
-    console.log("CART RESPONSE:", data);
+      const data = await res.json();
   
-    // data is an array
-    const cartMap: Record<number, number> = {};
-    data.forEach((item: any) => {
-      cartMap[item.product_id] = item.quantity;
-    });
+      const cartMap: Record<number, { quantity: number; cartItemId: number }> = {};
+      data.forEach((item: any) => {
+        cartMap[item.product_id] = { quantity: item.quantity, cartItemId: item.id };
+      });
   
-    setCart(cartMap);
+      setCart(cartMap);
+    } catch (e) {
+      console.error("Cart load failed", e);
+      setCart({});
+    }
   };
+  
+  
   
   
   const addToCart = async (productId: number) => {
@@ -107,7 +140,17 @@ export default function Products({ onProductSelect }: Props) {
 
       if (!response.ok) throw new Error("Failed adding to cart");
 
-      setCart(c => ({ ...c, [productId]: (c[productId] || 0) + 1 }));
+      setCart(prev => {
+        const existing = prev[productId];
+        return {
+          ...prev,
+          [productId]: {
+            quantity: existing ? existing.quantity + 1 : 1,
+            cartItemId: existing?.cartItemId || 0   // backend returns new ID on next loadCart
+          }
+        };
+      });
+      
       
     } catch (error) {
       alert("Failed to add product to cart");
@@ -120,30 +163,80 @@ export default function Products({ onProductSelect }: Props) {
     addToCart(id);
   }
 
-  function dec(id: number) {
-    setCart(c => {
-      const n = Math.max((c[id] || 0) - 1, 0);
-      const next = { ...c };
-      if (n === 0) delete next[id]; else next[id] = n;
-      return next;
+  const dec = async (productId: number) => {
+    const token = localStorage.getItem("nutrieve_token");
+    if (!token) return;
+  
+    const entry = cart[productId];
+    if (!entry) return;
+  
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+    // Case: delete item
+    if (entry.quantity <= 1) {
+      await fetch(`${apiUrl}/api/cart/${entry.cartItemId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+  
+      setCart(prev => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
+      });
+  
+      return;
+    }
+  
+    // Case: reduce quantity
+    await fetch(`${apiUrl}/api/cart/${entry.cartItemId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ quantity: entry.quantity - 1 })
     });
-  }
+  
+    setCart(prev => ({
+      ...prev,
+      [productId]: {
+        ...prev[productId],
+        quantity: prev[productId].quantity - 1
+      }
+    }));
+  };
+  
 
   const filteredItems = items
-    .filter(item => 
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low': return a.base_price - b.base_price;
-        case 'price-high': return b.base_price - a.base_price;
-        default: return a.name.localeCompare(b.name);
-      }
-    });
+  .filter(item => {
+    if (!category) return true;
+    const itemCategory = item.category?.toLowerCase();
+    if (category === "fruit") return item.category === "Fruit";
+    if (category === "spices") return item.category === "Spices & Herbs";
+    if (category === "veggies") return item.category === "Veggies";
+    return true;
+  })
+  .filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  .sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low': return a.base_price - b.base_price;
+      case 'price-high': return b.base_price - a.base_price;
+      default: return a.name.localeCompare(b.name);
+    }
+  })
+  
 
-  const total = items.reduce((sum, p) => sum + (cart[p.id] || 0) * p.base_price, 0);
-  const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+    const total = items.reduce(
+      (sum, p) => sum + (cart[p.id]?.quantity || 0) * p.base_price,
+      0
+    );
+    
+    const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+    
 
   if (loading) {
     return (
@@ -173,7 +266,7 @@ export default function Products({ onProductSelect }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-24 pb-28">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-[114px] pb-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
@@ -280,9 +373,34 @@ export default function Products({ onProductSelect }: Props) {
                   
                   {/* PRICE */}
                   <div>
-                    <div className="text-lg font-bold text-gray-800">₹{p.base_price.toFixed(0)}</div>
+                    {/* OFFER TAG */}
+                    <div className="inline-block mb-1 px-2 py-[2px] bg-red-100 text-red-600 text-[10px] font-semibold rounded">
+                      New Year Offer
+                    </div>
+
+                    {/* DISCOUNT */}
+                    <div className="text-xs text-red-600 font-semibold">
+                      -30%
+                    </div>
+
+                    {/* PRICE */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-gray-800">
+                        ₹{Math.round(p.base_price * 0.7)}
+                      </span>
+                      <span className="text-sm text-gray-400 line-through">
+                        ₹{p.base_price}
+                      </span>
+                    </div>
+
+                    {/* PRICE PER 100g */}
+                    <div className="text-[11px] text-gray-500">
+                      ₹{Math.round((p.base_price * 0.7) / 10)} per 100g
+                    </div>
+
                     <div className="text-[11px] text-gray-500">1000g pack</div>
                   </div>
+
 
                   {/* QUANTITY CONTROLS */}
                   <div className="flex items-center gap-2 h-9">
@@ -295,7 +413,7 @@ export default function Products({ onProductSelect }: Props) {
                     </button>
 
                     <div className="w-6 text-center font-semibold">
-                      {cart[p.id] || 0}
+                      {cart[p.id]?.quantity || 0}
                     </div>
 
                     <button
@@ -307,8 +425,6 @@ export default function Products({ onProductSelect }: Props) {
 
                   </div>
                  </div>
-
-
 
                 {/* View Button */}
                 <button
@@ -327,26 +443,28 @@ export default function Products({ onProductSelect }: Props) {
 
         {/* CART SUMMARY FLOATING BAR */}
         {totalItems > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-2xl p-6 z-50"
-          >
-            <div className="flex justify-between min-w-80">
-              <div>
-                <div className="font-semibold">{totalItems} items in cart</div>
-                <div className="text-sm text-gray-600">Total: ₹{total}</div>
-              </div>
-              <button
-                onClick={() => (window.location.hash = "cart")}
-                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-xl font-semibold"
-              >
-                Checkout
-              </button>
+        <motion.div
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="fixed bottom-4 inset-x-0 mx-auto w-[90%] max-w-md z-50"
+      >
 
-            </div>
-          </motion.div>
-        )}
+    <div className="bg-white rounded-2xl shadow-lg p-4 flex items-center justify-between border border-orange-200">
+      <div>
+        <div className="font-semibold">{totalItems} items in cart</div>
+        <div className="text-sm text-gray-600">Total: ₹{total}</div>
+      </div>
+
+      <button
+        onClick={() => (window.location.hash = "cart")}
+        className="px-5 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold"
+      >
+        Go to Cart
+      </button>
+    </div>
+  </motion.div>
+)}
+
 
       </div>
     </div>

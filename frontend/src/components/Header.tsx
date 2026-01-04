@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from "react";
 import { motion } from 'framer-motion';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+
 
 type HeaderProps = {
   user: any;
@@ -12,6 +13,8 @@ const Header = ({ user, setUser }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { cartCount } = useCart();
+  const [showProductsDropdown, setShowProductsDropdown] = useState(false);
+  const productsRef = useRef<HTMLDivElement | null>(null);
 
   // Scroll detection
   useEffect(() => {
@@ -27,9 +30,24 @@ const Header = ({ user, setUser }: HeaderProps) => {
     return () => window.removeEventListener("hashchange", closeMenu);
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        productsRef.current &&
+        !productsRef.current.contains(event.target as Node)
+      ) {
+        setShowProductsDropdown(false);
+      }
+    }
+  
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  
+
   const navItems = [
     { name: 'Home', hash: '' },
-    { name: 'Products', hash: 'products' },
+    { name: 'Products', hash: 'products',dropdown: true },
     { name: 'About', hash: 'about' },
     { name: 'Benefits', hash: 'benefits' },
     { name: 'Contact', hash: 'contact' }
@@ -105,19 +123,76 @@ const Header = ({ user, setUser }: HeaderProps) => {
 
           {/* DESKTOP NAV */}
           <nav className="hidden md:flex space-x-8">
-            {navItems.map((item) => (
-              <motion.button
-                key={item.name}
-                onClick={() => navigate(item.hash)}
-                className={`font-medium transition-colors hover:text-orange-600 ${
-                  isScrolled ? 'text-gray-700' : 'text-gray-800'
-                }`}
-                whileHover={{ y: -2 }}
-              >
-                {item.name}
-              </motion.button>
-            ))}
-          </nav>
+          {navItems.map((item) => (
+  <div key={item.name} ref={item.dropdown ? productsRef : null} className="relative">
+
+
+      <motion.button
+        onClick={() => {
+          if (item.dropdown) {
+            setShowProductsDropdown((prev) => !prev);
+          } else {
+            navigate(item.hash);
+          }
+        }}
+        
+        className={`font-medium transition-colors hover:text-orange-600 ${
+          isScrolled ? 'text-gray-700' : 'text-gray-800'
+        }`}
+        whileHover={{ y: -2 }}
+      >
+        <span className="flex items-center gap-1">
+          {item.name}
+          {item.dropdown && <span className="text-xs">▼</span>}
+        </span>
+
+      </motion.button>
+
+      {/* PRODUCTS DROPDOWN */}
+      {item.dropdown && showProductsDropdown && (
+        <div
+          className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg rounded-xl border border-orange-100 z-50"
+        >
+          <button
+            onClick={() => {
+              window.location.hash = "products";
+              setShowProductsDropdown(false);
+              // setIsProductsOpen(false);
+            }}
+            
+            className="block w-full text-left px-4 py-2 hover:bg-orange-50"
+          >
+            All Products
+          </button>
+          <button
+            onClick={() => {
+              window.location.hash = "products?category=fruit";
+              setShowProductsDropdown(false);
+              // setIsProductsOpen(false);
+            }}
+            
+            className="block w-full text-left px-4 py-2 hover:bg-orange-50"
+          >
+            Fruits
+          </button>
+          <button
+            onClick={() => { window.location.hash = "products?category=spices"; }}
+            className="block w-full text-left px-4 py-2 hover:bg-orange-50"
+          >
+            Spices & Herbs
+          </button>
+          <button
+            onClick={() => { window.location.hash = "products?category=veggies"; }}
+            className="block w-full text-left px-4 py-2 hover:bg-orange-50"
+          >
+            Veggies
+          </button>
+        </div>
+      )}
+    </div>
+  ))}
+</nav>
+
 
           {/* CART + AUTH + MENU BUTTON */}
           <div className="flex items-center space-x-4">
@@ -196,6 +271,43 @@ const Header = ({ user, setUser }: HeaderProps) => {
             animate={{ opacity: 1, height: 'auto' }}
           >
             {navItems.map((item) => (
+            item.name === "Products" ? (
+              <div key={item.name}>
+                <button
+                  onClick={() => navigate('#products')}
+                  className="block w-full text-left py-3 font-medium text-gray-700"
+                >
+                  All Products
+                </button>
+
+                <button
+                 onClick={() => {
+                  window.location.hash = "products?category=fruit";
+                  setIsMobileMenuOpen(false);
+                }}
+                
+                  className="block w-full text-left py-2 pl-4 text-gray-600"
+                >
+                  Fruits
+                </button>
+
+                <button
+                  onClick={() => { window.location.hash = "products?category=spices";
+                  setIsMobileMenuOpen(false); }}
+                  className="block w-full text-left py-2 pl-4 text-gray-600"
+                >
+                  Spices & Herbs
+                </button>
+
+                <button
+                  onClick={() => { window.location.hash = "products?category=veggies";
+                  setIsMobileMenuOpen(false); }}
+                  className="block w-full text-left py-2 pl-4 text-gray-600"
+                >
+                  Veggies
+                </button>
+              </div>
+            ) : (
               <button
                 key={item.name}
                 onClick={() => navigate(item.hash)}
@@ -203,7 +315,10 @@ const Header = ({ user, setUser }: HeaderProps) => {
               >
                 {item.name}
               </button>
-            ))}
+            )
+          ))}
+
+              
 
             {user ? (
               <>
