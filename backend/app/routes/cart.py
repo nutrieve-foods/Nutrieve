@@ -5,6 +5,8 @@ from ..deps.db import get_db
 from ..models import CartItem, Product, User
 from ..schema import CartItem as CartItemSchema, CartItemCreate, CartItemUpdate
 from ..routes.auth import get_current_user
+from fastapi import Response
+
 
 router = APIRouter(prefix="/api/cart", tags=["cart"])
 
@@ -98,6 +100,12 @@ def remove_from_cart(
     db.delete(cart_item)
     db.commit()
     return {"message": "Item removed from cart successfully"}
+
+@router.options("/{path:path}")
+def cart_preflight(path: str, response: Response):
+    response.status_code = 200
+    return
+
 
 @router.delete("/clear")
 def clear_cart(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

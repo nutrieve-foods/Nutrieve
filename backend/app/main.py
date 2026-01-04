@@ -5,6 +5,7 @@ from app.core.config import settings
 from app.routes import auth, cart, products, orders
 from app.database import Base, engine
 from app.routes import admin_seed
+print("DATABASE_URL:", settings.database_url)
 
 # Create tables
 try:
