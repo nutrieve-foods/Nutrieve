@@ -41,6 +41,8 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     reset_code = Column(String, nullable=True)
     reset_expiry = Column(DateTime, nullable=True)
+    otp_attempts = Column(Integer, default=0)
+    last_otp_sent_at = Column(DateTime, nullable=True)
     # Relationships
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user")

@@ -10,27 +10,53 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
 
   const handleReset = async () => {
+    if (!email || !otp || !password) {
+      setMsg("Please fill in all fields to reset your password.");
+      return;
+    }
+  
+    if (password.length < 8) {
+      setMsg("Password must be at least 8 characters long.");
+      return;
+    }
+  
     setLoading(true);
     setMsg("");
-
+  
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
       const r = await fetch(`${apiUrl}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp, new_password: password }),
+        body: JSON.stringify({
+          email,
+          otp,
+          new_password: password,
+        }),
       });
-
-      if (!r.ok) throw new Error("Invalid OTP or error occurred");
-
-      setMsg("Password reset successfully!");
-      setTimeout(() => (window.location.hash = "login"), 1200);
-    } catch (e) {
-      setMsg("Invalid OTP or email mismatch.");
+  
+      const data = await r.json();
+  
+      if (!r.ok) {
+        throw new Error(data.detail || "Invalid or expired verification code.");
+      }
+  
+      setMsg("Your password has been reset successfully. Redirecting to login…");
+  
+      setTimeout(() => {
+        window.location.hash = "login";
+      }, 1500);
+  
+    } catch (e: any) {
+      setMsg(
+        e.message ||
+          "We couldn't reset your password. Please verify the OTP and try again."
+      );
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">

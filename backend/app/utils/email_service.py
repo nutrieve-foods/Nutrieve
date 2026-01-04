@@ -7,14 +7,12 @@ POSTMARK_FROM_EMAIL = os.getenv("POSTMARK_FROM_EMAIL")
 def send_email(to_email: str, subject: str, body: str):
     """
     Sends an email using Postmark API.
-    Works on any hosting platform (Render, Vercel, Railway) without SMTP.
+    Gracefully fails if Postmark blocks (pending approval).
     """
 
-    if not POSTMARK_API_KEY:
-        raise Exception("POSTMARK_API_KEY is missing in environment variables")
-
-    if not POSTMARK_FROM_EMAIL:
-        raise Exception("POSTMARK_FROM_EMAIL is missing in environment variables")
+    if not POSTMARK_API_KEY or not POSTMARK_FROM_EMAIL:
+        print("⚠️ Email skipped: Postmark env vars missing")
+        return
 
     url = "https://api.postmarkapp.com/email"
 
@@ -23,7 +21,7 @@ def send_email(to_email: str, subject: str, body: str):
         "To": to_email,
         "Subject": subject,
         "TextBody": body,
-        "MessageStream": "outbound"  # Default Postmark stream
+        "MessageStream": "outbound"
     }
 
     headers = {
@@ -32,9 +30,13 @@ def send_email(to_email: str, subject: str, body: str):
         "X-Postmark-Server-Token": POSTMARK_API_KEY
     }
 
-    response = requests.post(url, json=payload, headers=headers)
+    try:
+        response = requests.post(url, json=payload, headers=headers)
 
-    if response.status_code != 200:
-        raise Exception(f"Postmark error: {response.text}")
+        if response.status_code != 200:
+            # IMPORTANT: do NOT raise Exception
+            print("⚠️ Postmark blocked email:", response.text)
 
-    return response.json()
+    except Exception as e:
+        print("⚠️ Email send failed:", e)
+

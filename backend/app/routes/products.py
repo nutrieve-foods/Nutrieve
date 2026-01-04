@@ -32,3 +32,5 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error in get_product: {e}")
         raise
+
+

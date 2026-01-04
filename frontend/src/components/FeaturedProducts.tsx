@@ -6,8 +6,15 @@ import { useEffect, useState } from "react";
 
 
 const FeaturedProducts = () => {
-  const [cart, setCart] = useState<Record<number, number>>({});
+  interface CartEntry {
+    quantity: number;
+    cartItemId: number;
+  }
+  
+  const [cart, setCart] = useState<Record<number, CartEntry>>({});
+  
   const [products, setProducts] = useState<any[]>([]);
+  const DISCOUNT_PERCENT = 30;
 
 useEffect(() => {
   loadCart();
@@ -24,25 +31,26 @@ const loadFeaturedProducts = async () => {
 };
 
 
-  const loadCart = async () => {
-    const token = localStorage.getItem("nutrieve_token");
-    if (!token) return;
-  
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-  
-    const res = await fetch(apiUrl + "/api/cart", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  
-    const data = await res.json();
-  
-    const cartMap: Record<number, number> = {};
-    data.forEach((item: any) => {
-      cartMap[item.product_id] = item.quantity;
-    });
-  
-    setCart(cartMap);
-  };
+const loadCart = async () => {
+  const token = localStorage.getItem("nutrieve_token");
+  if (!token) return;
+
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+  const res = await fetch(apiUrl + "/api/cart", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const data = await res.json();
+
+  const cartMap: Record<number, { quantity: number; cartItemId: number }> = {};
+  data.forEach((item: any) => {
+    cartMap[item.product_id] = { quantity: item.quantity, cartItemId: item.id };
+  });
+
+  setCart(cartMap);
+};
+
   
   useEffect(() => {
     loadCart();
@@ -57,32 +65,74 @@ const loadFeaturedProducts = async () => {
   
     const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
   
-    await fetch(`${apiUrl}/api/cart/add`, {
+    const res = await fetch(`${apiUrl}/api/cart/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         product_id: productId,
         quantity: 1,
-        size: "200gm"
-      })
+        size: "200gm",
+      }),
     });
   
-    setCart(c => ({ ...c, [productId]: (c[productId] || 0) + 1 }));
+    const data = await res.json(); // backend returns newly created item
+  
+    setCart(prev => ({
+      ...prev,
+      [productId]: {
+        quantity: (prev[productId]?.quantity || 0) + 1,
+        cartItemId: data.id, // IMPORTANT
+      },
+    }));
   };
   
-  const removeFromLocalCart = (productId: number) => {
-    setCart(c => {
-      const next = { ...c };
-      const qty = (c[productId] || 0) - 1;
-      if (qty <= 0) delete next[productId];
-      else next[productId] = qty;
   
-      return next;
+  const removeFromCart = async (productId: number) => {
+    const token = localStorage.getItem("nutrieve_token");
+    if (!token) return;
+  
+    const entry = cart[productId];
+    if (!entry) return;
+  
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+    // If quantity becomes zero → DELETE item
+    if (entry.quantity <= 1) {
+      await fetch(`${apiUrl}/api/cart/${entry.cartItemId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+  
+      setCart(prev => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
+      });
+      return;
+    }
+  
+    // Otherwise → reduce quantity by 1
+    await fetch(`${apiUrl}/api/cart/${entry.cartItemId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ quantity: entry.quantity - 1 })
     });
+  
+    setCart(prev => ({
+      ...prev,
+      [productId]: {
+        ...prev[productId],
+        quantity: prev[productId].quantity - 1
+      }
+    }));
   };
+  
   
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -157,8 +207,8 @@ const loadFeaturedProducts = async () => {
               {/* Product Image */}
               <div className="relative overflow-hidden">
                 <img
-                  src={product.image}
-                  alt={product.name}
+                  src={product.image ? `/${product.image}` : "/products.jpg"}
+
                   
                   className="
                     w-full 
@@ -184,32 +234,52 @@ const loadFeaturedProducts = async () => {
                   {product.description}
                 </p>
 
-                {/* Price */}
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xl md:text-2xl font-bold text-gray-900">
-                    {product.base_price.toFixed(0)}
-                  </span>
-                </div>
+          {/* Price */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500 line-through">
+                ₹{product.base_price.toFixed(0)}
+              </span>
+
+              <span className="text-xs bg-red-100 text-red-600 font-semibold px-2 py-0.5 rounded">
+                {DISCOUNT_PERCENT}% OFF
+              </span>
+            </div>
+
+            <div className="text-xl md:text-2xl font-bold text-gray-900">
+              ₹{(product.base_price * (1 - DISCOUNT_PERCENT / 100)).toFixed(0)}
+            </div>
+
+            <div className="text-xs text-green-600 font-medium mt-0.5">
+              New Year Offer
+            </div>
+
+            <div className="text-xs text-gray-500 mt-1">
+              ₹{(product.base_price / 10).toFixed(0)} per 100g
+            </div>
+          </div>
+
 
                 {/* Add to Cart */}
                 {/* If item is in cart → show quantity controls */}
-{cart[product.id] ? (
-  <div className="flex items-center justify-between mt-2">
-    <button
-      className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center"
-      onClick={() => removeFromLocalCart(product.id)}
-    >
-      -
-    </button>
+    {cart[product.id] ? (
+      <div className="flex items-center justify-between mt-2">
+        <button
+          className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center"
+          onClick={() => removeFromCart(product.id)}
+        >
+          -
+        </button>
 
-    <span className="font-semibold text-lg">{cart[product.id]}</span>
+        <span className="font-semibold text-lg">{cart[product.id]?.quantity}</span>
+      
 
-    <button
-      className="w-9 h-9 rounded-full bg-orange-500 text-white flex items-center justify-center"
-      onClick={() => addToCart(product.id)}
-    >
-      +
-    </button>
+        <button
+          className="w-9 h-9 rounded-full bg-orange-500 text-white flex items-center justify-center"
+          onClick={() => addToCart(product.id)}
+        >
+          +
+        </button>
         </div>
       ) : (
         <motion.button

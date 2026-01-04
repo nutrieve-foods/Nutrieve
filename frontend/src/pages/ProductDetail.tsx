@@ -20,13 +20,14 @@ export default function ProductDetail({ productId, onBack }: Props) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState('200gm');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [cartItemId, setCartItemId] = useState<number | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
+
   useEffect(() => {
     loadProduct();
     loadCartQuantity();
@@ -65,60 +66,85 @@ export default function ProductDetail({ productId, onBack }: Props) {
     });
   
     const data = await res.json();
-    console.log("DETAIL CART:", data);
   
+    // Find entry of SAME PRODUCT + SAME SIZE
     const item = data.find(
-      (i: any) => i.product_id === parseInt(productId)
+      (i: any) =>
+        i.product_id === parseInt(productId) &&
+        i.size === selectedSize
     );
   
     if (item) {
       setQuantity(item.quantity);
+      setCartItemId(item.id);
+    } else {
+      setQuantity(0);
+      setCartItemId(null);
     }
   };
+  useEffect(() => {
+    loadCartQuantity();
+  }, [selectedSize]);
   
-  
+
   const calculatePrice = (base: number, size: string) => {
-    const multiplier: any = { "200gm": 0.2, "500gm": 0.5, "1kg": 1.0 };
+    const multiplier: any = { "200gm": 0.2, "500gm": 0.5, "2kg": 2.0, "10kg": 10.0 };
     return base * (multiplier[size] || 1);
   };
 
   const addToCart = async () => {
     if (!product) return;
-
-    setAddingToCart(true);
-    try {
-      const token = localStorage.getItem("nutrieve_token");
-      if (!token) {
-        window.location.hash = "login";
-        return;
-      }
-
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      await fetch(`${apiUrl}/api/cart/add`, {
-        method: "POST",
+  
+    const token = localStorage.getItem("nutrieve_token");
+    if (!token) {
+      window.location.hash = "login";
+      return;
+    }
+  
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+    // If item exists → UPDATE
+    if (cartItemId) {
+      await fetch(`${apiUrl}/api/cart/${cartItemId}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          product_id: product.id,
-          quantity,
-          size: selectedSize,
-        }),
+        body: JSON.stringify({ quantity }),
       });
-
-      alert("Product added to cart!");
-    } catch (e) {
-      console.error(e);
-      alert("Failed adding to cart");
-    } finally {
-      setAddingToCart(false);
+  
+      alert(`${quantity} × ${selectedSize} updated in your cart`);
+      return;
     }
+  
+    // Else → CREATE new entry
+    const res = await fetch(`${apiUrl}/api/cart/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        product_id: product.id,
+        quantity,
+        size: selectedSize,
+      }),
+    });
+  
+    const data = await res.json();
+    setCartItemId(data.id);
+  
+    alert(`${quantity} × ${selectedSize} added to your cart`);
   };
+  
+  
+   
+  
 
   const buyNow = async () => {
     await addToCart();
-    if (!addingToCart) window.location.hash = "cart";
+    window.location.hash = "cart";
   };
 
   if (loading) {
@@ -213,7 +239,7 @@ export default function ProductDetail({ productId, onBack }: Props) {
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
               <h3 className="text-lg font-semibold mb-3">Select Size</h3>
               <div className="grid grid-cols-3 gap-3">
-                {["200gm", "500gm", "1kg"].map((s) => (
+                {["200gm", "500gm", "2kg", "10kg"].map((s) => (
                   <button
                     key={s}
                     onClick={() => setSelectedSize(s)}
@@ -237,33 +263,95 @@ export default function ProductDetail({ productId, onBack }: Props) {
               <h3 className="text-lg font-semibold mb-3">Quantity</h3>
 
               <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center"
-                >
-                  -
-                </button>
+              <button
+  onClick={async () => {
+    if (quantity === 0) return;
 
-                <span className="text-xl font-semibold">{quantity}</span>
+    const token = localStorage.getItem("nutrieve_token");
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center"
-                >
-                  +
-                </button>
+    if (quantity === 1) {
+      // Delete entry
+      await fetch(`${apiUrl}/api/cart/${cartItemId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setQuantity(0);
+      setCartItemId(null);
+      return;
+    }
+
+    // Update quantity
+    await fetch(`${apiUrl}/api/cart/${cartItemId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ quantity: quantity - 1 }),
+          });
+
+          setQuantity(quantity - 1);
+        }}
+        className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center"
+      >
+        -
+      </button>
+
+
+
+                      <span className="text-xl font-semibold">{quantity}</span>
+
+                      <button
+        onClick={() => setQuantity(quantity + 1)}
+        className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center"
+      >
+        +
+      </button>
               </div>
             </div>
 
+            
             {/* PRICE */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <div className="text-3xl font-bold">
-                ₹{(calculatePrice(product.base_price, selectedSize) * quantity).toFixed(0)}
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+
+              {/* OFFER BADGE */}
+              <div className="inline-block mb-2 px-3 py-1 text-xs font-semibold bg-red-600 text-white rounded">
+                New Year Offer
               </div>
-              <div className="text-gray-600 text-sm">
+
+              {/* PRICE ROW */}
+              <div className="flex items-end gap-3">
+                <span className="text-red-600 text-lg font-semibold">-30%</span>
+
+                <span className="text-3xl font-bold text-gray-900">
+                  ₹{(
+                    calculatePrice(product.base_price, selectedSize) *
+                    quantity *
+                    0.7
+                  ).toFixed(0)}
+                </span>
+
+                <span className="text-gray-500 line-through text-lg">
+                  ₹{(
+                    calculatePrice(product.base_price, selectedSize) *
+                    quantity
+                  ).toFixed(0)}
+                </span>
+              </div>
+
+              {/* PRICE PER 100g */}
+              <div className="text-sm text-gray-600 mt-1">
+                ₹{(product.base_price / 10).toFixed(0)} / 100g
+              </div>
+
+              {/* UNIT PRICE */}
+              <div className="text-gray-500 text-sm">
                 ₹{calculatePrice(product.base_price, selectedSize)} per {selectedSize}
               </div>
-            </div>
+
+              </div>
+
 
             {/* BUTTONS */}
             <div className="flex flex-col sm:flex-row gap-4">

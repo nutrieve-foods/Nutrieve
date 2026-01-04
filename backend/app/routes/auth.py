@@ -76,36 +76,30 @@ def get_current_user(
 
 @router.post("/signup")
 def signup(user: UserCreate, db: Session = Depends(get_db)):
-    """Register a new user"""
     try:
-        # Check if already exists
         db_user = db.query(User).filter(User.email == user.email).first()
         if db_user:
             raise HTTPException(status_code=400, detail="Email already registered")
 
-        # Extract raw password
         raw_pwd = (user.password or "").strip()
 
-        # 1️⃣ Validate ASCII-only characters
+        # ASCII check
         try:
             raw_pwd.encode("ascii")
         except UnicodeEncodeError:
             raise HTTPException(
                 status_code=400,
-                detail="Password must contain only letters, numbers, and ASCII symbols"
+                detail="Password must contain only letters, numbers, and symbols"
             )
 
-        # 2️⃣ Validate length 8–16
-        if len(raw_pwd) < 8 or len(raw_pwd) > 16:
+        if not (8 <= len(raw_pwd) <= 16):
             raise HTTPException(
                 status_code=400,
-                detail="Password must be 8 to 16 characters long"
+                detail="Password must be 8–16 characters long"
             )
 
-        # 3️⃣ Hash the clean password
         hashed_password = get_password_hash(raw_pwd)
 
-        # Create new user
         db_user = User(
             name=user.name,
             email=user.email,
@@ -117,12 +111,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(db_user)
 
-        # Create JWT token
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"sub": db_user.email},
-            expires_delta=access_token_expires
-        )
+        access_token = create_access_token({"sub": db_user.email})
 
         return {
             "access_token": access_token,
@@ -140,7 +129,8 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Signup failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Signup failed")
+
 
 
 
@@ -192,24 +182,64 @@ def forgot_password(data: dict = Body(...), db: Session = Depends(get_db)):
     email = data.get("email", "").strip()
 
     user = db.query(User).filter(User.email.ilike(email)).first()
+    # 🔐 OTP resend limits
+    if user.last_otp_sent_at:
+        if datetime.utcnow() - user.last_otp_sent_at < timedelta(minutes=15):
+            if user.otp_attempts >= 3:
+                raise HTTPException(
+                    status_code=429,
+                    detail="Too many OTP requests. Try again after 15 minutes."
+                )
+        else:
+            # Reset counter after cooldown
+            user.otp_attempts = 0
+
     if not user:
         raise HTTPException(status_code=404, detail="Email not registered")
 
     otp = str(random.randint(100000, 999999))
     expiry = datetime.utcnow() + timedelta(minutes=10)
 
+
+    
+    user.otp_attempts += 1
+    user.last_otp_sent_at = datetime.utcnow()
+
     user.reset_code = otp
     user.reset_expiry = expiry
     db.commit()
 
-    send_email(
-    to_email=email,
-    subject="Your Nutrieve Password Reset Code",
-    body=f"Your OTP for resetting your Nutrieve password is: {otp}\nThis code will expire in 10 minutes."
-)
+    try:
+        if os.getenv("EMAIL_ENABLED") == "true":
+            send_email(
+            to_email=email,
+            subject="Reset your Nutrieve password",
+                body=(
+                f"Hello {user.name},\n\n"
+                f"We received a request to reset your Nutrieve account password.\n\n"
+                f"Your One-Time Password (OTP) is:\n\n"
+                f"{otp}\n\n"
+                f"This OTP is valid for 10 minutes.\n"
+                f"If you did not request this, please ignore this email.\n\n"
+                f"— Nutrieve Support Team"
+            )
+        )
+        else:
+    # Dev / approval-pending mode
+         print(f"📧 OTP for {email}: {otp}")
+    except Exception as e:
+        print("❌ EMAIL ERROR:", str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Email service failed: {str(e)}"
+        )
 
 
-    return {"message": "OTP sent to email"}
+    return {"message": "OTP sent to your email"}
+
+
+
+
 
 
 @router.post("/reset-password")
@@ -228,6 +258,12 @@ def reset_password(data: dict = Body(...), db: Session = Depends(get_db)):
 
     if datetime.utcnow() > user.reset_expiry:
         raise HTTPException(status_code=400, detail="OTP expired")
+
+    if not new_password or len(new_password.strip()) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 8 characters long"
+        )
 
     hashed_password = get_password_hash(new_password)
 

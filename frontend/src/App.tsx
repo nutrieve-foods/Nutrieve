@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from './components/Header';
+import SalesRibbon from './components/SalesRibbon';
 import Hero from './components/Hero';
 import About from './components/About';
 import FeaturedProducts from './components/FeaturedProducts';
@@ -61,6 +62,8 @@ function App() {
         const orderIdFromHash = parseInt(hash.split('/')[1]);
         setOrderId(orderIdFromHash);
         setCurrentPage('order-success');
+      } else if (hash.startsWith('products')) {
+        setCurrentPage('products');
       } else {
         setCurrentPage(hash || 'home');
       }
@@ -190,6 +193,7 @@ function App() {
     <CartProvider>
      <div className="min-h-screen overflow-x-hidden">
         <Header user={user} setUser={setUser} />
+        {currentPage !== 'payment' && <SalesRibbon />}
         <main>{renderPage()}</main>
         { <Footer />}
       </div>

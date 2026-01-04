@@ -105,7 +105,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 pt-24 pb-10 px-3">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 pt-[104px] pb-10 px-3">
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -144,7 +144,7 @@ export default function Dashboard() {
           transition={{ delay: 0.2 }}
           className="bg-white rounded-2xl shadow-lg p-6 mb-6"
         >
-          <div className="flex justify-center space-x-2">
+          <div className="flex justify-center space-x-2"> 
             <button
               onClick={() => setActiveTab('orders')}
               className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-xl font-semibold transition-all ${

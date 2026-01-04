@@ -18,25 +18,66 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
   const [paymentMethod, setPaymentMethod] = useState('phonepe');
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [cartLoading, setCartLoading] = useState(true);
+  const COUPON_CODE = "NUTRIEVE40";
+  const COUPON_PERCENT = 40;
+  const [coupon, setCoupon] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
 
+  const isCouponEligible = cartItems.some((item: any) => {
+    const weightKg =
+      item.size === "200g" ? 0.2 :
+      item.size === "500g" ? 0.5 :
+      item.size === "2kg" ? 2 :
+      item.size === "10kg" ? 10 : 1;
+  
+    return weightKg * item.quantity >= 10;
+  });
+  
   // ----- Helpers copied from cart page for accurate totals -----
-  const calculatePrice = (basePrice: number, size: string): number => {
-    const multipliers: Record<string, number> = {
-      '200gm': 1.0,
-      '500gm': 2.3,
-      '1kg': 4.2
-    };
-    return basePrice * (multipliers[size] || 1.0);
+  const SIZE_MULTIPLIER: Record<string, number> = {
+    '200gm': 0.2,
+    '500gm': 0.5,
+    '1kg': 1,
+    '2kg': 2,
+    '10kg': 10,
   };
+  
+  const DISCOUNT_PERCENT = 30;
+  
+  const calculatePrice = (basePrice: number, size: string) =>
+    basePrice * (SIZE_MULTIPLIER[size] || 1);
+  
+  const applyDiscount = (price: number) =>
+    Math.round(price * (1 - DISCOUNT_PERCENT / 100));
+
+ 
+
 
   const calculateItemTotal = (item: any): number => {
-    const price = calculatePrice(item.product.base_price, item.size);
-    return price * item.quantity;
+    const base =
+      calculatePrice(item.product.base_price, item.size) *
+      item.quantity;
+  
+    const newYearDiscount = base * 0.30;
+    const couponDiscount =
+      couponApplied && isCouponEligible ? base * 0.40 : 0;
+  
+    return couponApplied && isCouponEligible
+      ? base - couponDiscount
+      : base - newYearDiscount;
   };
+  
+  
+  
+  
 
   const calculateSubtotal = (): number => {
-    return cartItems.reduce((total, item) => total + calculateItemTotal(item), 0);
+    return cartItems.reduce(
+      (total, item) => total + calculateItemTotal(item),
+      0
+    );
   };
+  
 
   const calculateCGST = (subtotal: number): number => subtotal * 0.025;
   const calculateSGST = (subtotal: number): number => subtotal * 0.025;
@@ -109,7 +150,7 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
               product_id: item.product_id,
               size: item.size,
               quantity: item.quantity,
-              price: calculatePrice(item.product.base_price, item.size),
+              price: calculateItemTotal(item) / item.quantity,
             })),
             total_amount: totalAmount,
             payment_status: "completed", // ✅ Mark payment completed
@@ -282,6 +323,50 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
             </motion.button>
           </motion.div>
 
+          {/* Coupon Breakdown
+            {couponApplied && isCouponEligible && (
+              <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50 p-4 space-y-2 text-sm">
+
+                <div className="flex justify-between text-gray-700">
+                  <span>Original Price</span>
+                  <span>
+                    ₹{cartItems.reduce((sum, item) => {
+                      const base =
+                        calculatePrice(item.product.base_price, item.size) *
+                        item.quantity;
+                      return sum + base;
+                    }, 0).toFixed(0)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-green-700">
+                  <span>New Year Offer (30%)</span>
+                  <span>
+                    - ₹{cartItems.reduce((sum, item) => {
+                      const base =
+                        calculatePrice(item.product.base_price, item.size) *
+                        item.quantity;
+                      return sum + base * 0.30;
+                    }, 0).toFixed(0)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-green-700 font-semibold">
+                  <span>Coupon NUTRIEVE40 (40%)</span>
+                  <span>
+                    - ₹{cartItems.reduce((sum, item) => {
+                      const base =
+                        calculatePrice(item.product.base_price, item.size) *
+                        item.quantity;
+                      return sum + base * 0.40;
+                    }, 0).toFixed(0)}
+                  </span>
+                </div>
+
+              </div>
+            )} */}
+
+
           {/* Order Summary */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -289,6 +374,43 @@ export default function Payment({ orderData, onBack, onSuccess }: Props) {
             className="bg-white rounded-2xl shadow-lg p-8"
           >
             <h3 className="font-playfair text-xl font-bold text-gray-800 mb-6">Order Summary</h3>
+            <div className="mb-4">
+  <label className="text-sm font-medium text-gray-700">Apply Coupon</label>
+  <div className="flex gap-2 mt-1">
+    <input
+      value={coupon}
+      onChange={(e) => setCoupon(e.target.value)}
+      placeholder="Enter coupon code"
+      className="flex-1 px-3 py-2 border rounded-lg"
+    />
+    <button
+      onClick={() => {
+        if (coupon === "NUTRIEVE40") {
+          if (!isCouponEligible) {
+            setError(
+              "Code is invalid. Your cart must contain 10 kg or more of any individual product."
+            );
+            setCouponApplied(false);
+            return;
+          }
+        
+          setCouponApplied(true);
+          setError("");
+        }
+      }}
+      className="px-4 py-2 bg-orange-500 text-white rounded-lg"
+    >
+      Apply
+    </button>
+  </div>
+
+  {couponApplied && (
+    <p className="text-green-600 text-sm mt-1">
+      🎉 Coupon applied: 40% OFF on original price
+    </p>
+  )}
+</div>
+
             
           {/* Order Details */}
           <div className="space-y-4 mb-6">
