@@ -317,7 +317,7 @@ export default function ProductDetail({ productId, onBack }: Props) {
 
               {/* OFFER BADGE */}
               <div className="inline-block mb-2 px-3 py-1 text-xs font-semibold bg-red-600 text-white rounded">
-                New Year Offer
+                Launching Offer
               </div>
 
               {/* PRICE ROW */}

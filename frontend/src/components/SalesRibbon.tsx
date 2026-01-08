@@ -18,7 +18,7 @@ export default function SalesRibbon() {
         style={{ animation: "marquee 18s linear infinite" }}
       >
         <span role="img" aria-label="flash" className="mr-1">⚡</span>
-        Flash Sale for New Year! <span className="mx-2">|</span>
+        Launching Offer! Hurry Up! <span className="mx-2">|</span>
         <span role="img" aria-label="gift" className="mr-1">🎁</span>
         For Bulk Orders:
         <span className="ml-1">40% OFF</span>
