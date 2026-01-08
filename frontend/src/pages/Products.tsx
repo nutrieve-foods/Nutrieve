@@ -321,15 +321,14 @@ export default function Products({ onProductSelect }: Props) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
           className="
-                    grid 
-                    grid-cols-2 
-                    sm:grid-cols-3 
-                    md:grid-cols-3 
-                    lg:grid-cols-4 
-                    gap-3 sm:gap-5 lg:gap-5
-                    auto-rows-fr
-                    mb-8
-                  "
+                      grid 
+                      grid-cols-2 
+                      sm:grid-cols-3 
+                      md:grid-cols-3 
+                      lg:grid-cols-4 
+                      gap-2 sm:gap-5 lg:gap-5
+                    "
+
         >
 
           {filteredItems.map((p, index) => (
@@ -338,16 +337,20 @@ export default function Products({ onProductSelect }: Props) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06 }}
-              className="group bg-white rounded-xl shadow-sm hover:shadow-xl overflow-hidden border border-gray-200 transition-all flex flex-col h-[430px] sm:h-[450px]"
+              className="group bg-white rounded-xl shadow-sm hover:shadow-xl overflow-visible border border-gray-200 transition-all flex flex-col h-[500px] sm:h-[450px]"
               whileHover={{ y: -4 }}
             >
               
               {/* Image */}
-              <div className="relative overflow-hidden">
+              {/* <div className="relative h-[220px] sm:h-[180px] bg-white rounded-t-xl overflow-hidden flex items-center justify-center"> */}
+              <div className="relative h-[220px] sm:h-[180px] rounded-t-xl overflow-hidden">
+
+
                 <img
                   src={`/${p.image}`} 
                   alt={p.name}
-                  className="w-full h-[160px] sm:h-[180px] object-cover rounded-t-xl"
+                  // className="w-full h-[px] sm:h-[180px] object-contain sm:object-cover bg-white rounded-t-xl"
+                   className="w-full h-full object-cover"
                 />
 
                 <button
@@ -360,22 +363,26 @@ export default function Products({ onProductSelect }: Props) {
 
               {/* CONTENT */}
               <div className="p-4 flex flex-col gap-3 flex-grow">
-              <h3 className="font-playfair text-lg font-semibold text-gray-800">
+              <h3 className="font-playfair text-lg font-semibold text-gray-800 line-clamp-2 leading-snug min-h-[48px]">
+
+
                   {p.name}
                 </h3>
 
-                <p className="text-gray-600 text-xs line-clamp-2">
+                <p className="text-gray-600 text-xs line-clamp-2 min-h-[32px]">
+
                   {p.description || 'Premium organic spice powder'}
                 </p>
 
-                {/* FIXED ALIGNMENT PRICE + QUANTITY */}
-                <div className="flex items-center justify-between mt-auto">
-                  
-                  {/* PRICE */}
-                  <div>
+                {/* PRICE AND QUANTITY SECTION */}
+                <div className="mt-auto sm:flex sm:items-end sm:gap-4">
+
+                  {/* PRICE SECTION */}
+                  <div className="mb-3 sm:mb-0 sm:flex-shrink-0">
+
                     {/* OFFER TAG */}
                     <div className="inline-block mb-1 px-2 py-[2px] bg-red-100 text-red-600 text-[10px] font-semibold rounded">
-                      New Year Offer
+                      Launching Offer
                     </div>
 
                     {/* DISCOUNT */}
@@ -401,9 +408,27 @@ export default function Products({ onProductSelect }: Props) {
                     <div className="text-[11px] text-gray-500">1000g pack</div>
                   </div>
 
+                  {/* MOBILE QUANTITY CONTROLS - Centered, full width */}
+                  <div className="flex sm:hidden items-center justify-center gap-3 w-full py-2">
+                    <button
+                      className="w-8 h-8 rounded-full bg-gray-100 flex justify-center items-center hover:bg-gray-200 transition"
+                      onClick={() => dec(p.id)}
+                    >
+                      -
+                    </button>
+                    <div className="w-8 text-center font-semibold">
+                      {cart[p.id]?.quantity || 0}
+                    </div>
+                    <button
+                      className="w-8 h-8 rounded-full bg-orange-500 text-white flex justify-center items-center hover:bg-orange-600 transition"
+                      onClick={() => inc(p.id)}
+                    >
+                      +
+                    </button>
+                  </div>
 
-                  {/* QUANTITY CONTROLS */}
-                  <div className="flex items-center gap-2 h-9">
+                  {/* DESKTOP QUANTITY CONTROLS - Right aligned */}
+                  <div className="hidden sm:flex items-center gap-2 justify-end flex-1">
 
                     <button
                       className="w-8 h-8 rounded-full bg-gray-100 flex justify-center items-center hover:bg-gray-200 transition"
@@ -411,20 +436,17 @@ export default function Products({ onProductSelect }: Props) {
                     >
                       -
                     </button>
-
                     <div className="w-6 text-center font-semibold">
                       {cart[p.id]?.quantity || 0}
                     </div>
-
                     <button
                       className="w-8 h-8 rounded-full bg-orange-500 text-white flex justify-center items-center hover:bg-orange-600 transition"
                       onClick={() => inc(p.id)}
                     >
                       +
                     </button>
-
                   </div>
-                 </div>
+                </div>
 
                 {/* View Button */}
                 <button

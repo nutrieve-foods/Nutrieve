@@ -251,7 +251,7 @@ const loadCart = async () => {
             </div>
 
             <div className="text-xs text-green-600 font-medium mt-0.5">
-              New Year Offer
+              Launching Offer
             </div>
 
             <div className="text-xs text-gray-500 mt-1">
