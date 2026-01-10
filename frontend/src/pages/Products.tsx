@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ListFilter as Filter, Eye } from 'lucide-react';
-
-
+import { Helmet } from "react-helmet-async";
 
 type Product = { 
   id: number; 
@@ -56,7 +55,7 @@ export default function Products({ onProductSelect }: Props) {
     window.addEventListener("hashchange", handler);
     return () => window.removeEventListener("hashchange", handler);
   }, []);
-  
+
   const loadProducts = async () => {
     try {
       setLoading(true);
@@ -266,14 +265,39 @@ export default function Products({ onProductSelect }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-[114px] pb-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
+    <>
+      {/* ✅ SEO META TAGS */}
+      <Helmet>
+        <title>Vegetable Powder Products | Nutrieve</title>
+        <meta
+          name="description"
+          content="Explore Nutrieve’s range of vegetable powders including onion, garlic, tomato, spinach and more."
+        />
+        <link rel="canonical" href="https://www.nutrieve.in/#products" />
+      </Helmet>
+  
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 pt-[114px] pb-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  
+          {/* ✅ PAGE H1 (ONLY ONE) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-10"
+          >
+            <h1 className="font-playfair text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              Vegetable Powder Products
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Authentic spice powders made with purity & tradition.
+            </p>
+          </motion.div>
+  
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="font-playfair text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-gray-800 mb-4">
             Our Premium Collection
-          </h1>
+          </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Authentic spice powders made with purity & tradition.
           </p>
@@ -490,5 +514,6 @@ export default function Products({ onProductSelect }: Props) {
 
       </div>
     </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 type Props = { onSignedIn?: () => void };
 
 export default function Login({ onSignedIn }: Props) {
@@ -42,8 +43,34 @@ export default function Login({ onSignedIn }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
-      <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+      <Helmet>
+        <title>Login | Sign In | Nutrieve</title>
+        <meta
+          name="description"
+          content="Sign in to your Nutrieve account to access premium vegetable powders and manage your orders."
+        />
+        <meta
+          name="keywords"
+          content="Nutrieve login, sign in, vegetable powder login, Nutrieve account login"
+        />
+        <link rel="canonical" href="https://www.nutrieve.in/#login" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Login | Sign In | Nutrieve" />
+        <meta
+          property="og:description"
+          content="Sign in to your Nutrieve account to access premium vegetable powders."
+        />
+        <meta property="og:url" content="https://www.nutrieve.in/#login" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Login | Sign In | Nutrieve" />
+        <meta
+          name="twitter:description"
+          content="Sign in to your Nutrieve account to access premium vegetable powders."
+        />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
+        <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -132,5 +159,6 @@ export default function Login({ onSignedIn }: Props) {
         </motion.div>
       </div>
     </div>
+    </>
   );
 }

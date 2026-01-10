@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Star, ShoppingCart, Zap, Leaf, Shield, Heart } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 type Product = {
   id: number;
@@ -172,8 +173,36 @@ export default function ProductDetail({ productId, onBack }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 pt-20 pb-10">
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
+    <>
+      <Helmet>
+        <title>{product ? `${product.name} | Nutrieve` : 'Product Details | Nutrieve'}</title>
+        <meta
+          name="description"
+          content={product ? `${product.description || `Buy ${product.name} powder online. Premium quality, natural, and hygienic vegetable powder from Nutrieve.`}` : 'View product details and specifications on Nutrieve.'}
+        />
+        <meta
+          name="keywords"
+          content={`${product?.name || 'product'}, vegetable powder, Nutrieve, natural food products, dehydrated vegetables`}
+        />
+        <link rel="canonical" href={`https://www.nutrieve.in/#product/${productId}`} />
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={product ? `${product.name} | Nutrieve` : 'Product Details | Nutrieve'} />
+        <meta
+          property="og:description"
+          content={product ? `${product.description || `Premium quality ${product.name} powder from Nutrieve.`}` : 'View product details on Nutrieve.'}
+        />
+        <meta property="og:url" content={`https://www.nutrieve.in/#product/${productId}`} />
+        {product?.image && <meta property="og:image" content={`https://www.nutrieve.in/${product.image}`} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={product ? `${product.name} | Nutrieve` : 'Product Details | Nutrieve'} />
+        <meta
+          name="twitter:description"
+          content={product ? `${product.description || `Premium quality ${product.name} powder.`}` : 'View product details on Nutrieve.'}
+        />
+        {product?.image && <meta name="twitter:image" content={`https://www.nutrieve.in/${product.image}`} />}
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 pt-20 pb-10">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
 
         {/* Back Button */}
         <motion.button
@@ -374,5 +403,6 @@ export default function ProductDetail({ productId, onBack }: Props) {
         </div>
       </div>
     </div>
+    </>
   );
 }
