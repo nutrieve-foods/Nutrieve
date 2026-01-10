@@ -1,13 +1,42 @@
 import { motion } from "framer-motion";
 import { Leaf, Users } from "lucide-react";
 import { FaHandshake } from "react-icons/fa";
+import { Helmet } from "react-helmet-async";
 
 const About = () => {
   return (
-    <section
-      id="about"
-      className="relative py-20 bg-gradient-to-br from-white via-orange-50 to-white"
-    >
+    <>
+      <Helmet>
+        <title>About Nutrieve | Natural Food Products | Our Story</title>
+        <meta
+          name="description"
+          content="Learn about Nutrieve's mission to provide natural, hygienic and nutrient-rich vegetable powders. Empowering communities through sustainable agriculture and women empowerment."
+        />
+        <meta
+          name="keywords"
+          content="Nutrieve about, vegetable powder manufacturer, sustainable agriculture, women empowerment, natural food products India"
+        />
+        <link rel="canonical" href="https://www.nutrieve.in/#about" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="About Nutrieve | Natural Food Products" />
+        <meta
+          property="og:description"
+          content="Learn about Nutrieve's mission to provide natural, hygienic and nutrient-rich vegetable powders through sustainable agriculture."
+        />
+        <meta property="og:url" content="https://www.nutrieve.in/#about" />
+        <meta property="og:image" content="https://www.nutrieve.in/og-image.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="About Nutrieve | Natural Food Products" />
+        <meta
+          name="twitter:description"
+          content="Learn about Nutrieve's mission to provide natural, hygienic and nutrient-rich vegetable powders."
+        />
+        <meta name="twitter:image" content="https://www.nutrieve.in/og-image.jpg" />
+      </Helmet>
+      <section
+        id="about"
+        className="relative py-20 bg-gradient-to-br from-white via-orange-50 to-white"
+      >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         {/* Left Content */}
         <motion.div
@@ -108,6 +137,7 @@ const About = () => {
         </motion.div>
       </div>
     </section>
+    </>
   );
 };
 

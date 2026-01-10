@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, Phone, ArrowRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 // import { useNavigate } from 'react-router-dom';
 
 type Props = { onSignedUp?: () => void };
@@ -47,8 +48,34 @@ export default function Signup({ onSignedUp }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
-      <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+      <Helmet>
+        <title>Sign Up | Create Account | Nutrieve</title>
+        <meta
+          name="description"
+          content="Create your Nutrieve account to start shopping premium vegetable powders. Join us for natural, hygienic, and nutrient-rich food products."
+        />
+        <meta
+          name="keywords"
+          content="Nutrieve signup, create account, vegetable powder registration, Nutrieve account"
+        />
+        <link rel="canonical" href="https://www.nutrieve.in/#signup" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Sign Up | Create Account | Nutrieve" />
+        <meta
+          property="og:description"
+          content="Create your Nutrieve account to start shopping premium vegetable powders."
+        />
+        <meta property="og:url" content="https://www.nutrieve.in/#signup" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Sign Up | Create Account | Nutrieve" />
+        <meta
+          name="twitter:description"
+          content="Create your Nutrieve account to start shopping premium vegetable powders."
+        />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8">
+        <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -155,5 +182,6 @@ export default function Signup({ onSignedUp }: Props) {
         </motion.div>
       </div>
     </div>
+    </>
   );
 }

@@ -1,12 +1,41 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Star } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const Hero = () => {
   return (
-    <section
-      id="home"
-      className="relative min-h-[90vh] md:min-h-screen flex items-center justify-center overflow-hidden w-full max-w-full ..."
->
+    <>
+      <Helmet>
+        <title>Nutrieve – Natural Vegetable Powders & Healthy Foods</title>
+        <meta
+          name="description"
+          content="Nutrieve offers premium vegetable powders like onion, garlic, tomato, spinach and more. 100% natural, hygienic, and nutrient-rich food products."
+        />
+        <meta
+          name="keywords"
+          content="Nutrieve, vegetable powder manufacturer, onion powder, garlic powder, tomato powder, spinach powder, dehydrated vegetables India"
+        />
+        <link rel="canonical" href="https://www.nutrieve.in/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Nutrieve – Natural Vegetable Powders" />
+        <meta
+          property="og:description"
+          content="Premium quality vegetable powders made from fresh vegetables. Hygienic, natural and nutrient-rich."
+        />
+        <meta property="og:url" content="https://www.nutrieve.in/" />
+        <meta property="og:image" content="https://www.nutrieve.in/og-image.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Nutrieve – Natural Vegetable Powders" />
+        <meta
+          name="twitter:description"
+          content="Premium quality vegetable powders made from fresh vegetables."
+        />
+        <meta name="twitter:image" content="https://www.nutrieve.in/og-image.jpg" />
+      </Helmet>
+      <section
+        id="home"
+        className="relative min-h-[90vh] md:min-h-screen flex items-center justify-center overflow-hidden w-full max-w-full ..."
+      >
       {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center"
@@ -144,6 +173,7 @@ const Hero = () => {
       </motion.div>
 
     </section>
+    </>
   );
 };
 
